@@ -1,0 +1,220 @@
+body{
+
+    background-color: #19384f;
+    color: #D9D9D9;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.encabezado{
+
+    position: fixed;
+    background-color: #171d25;
+    padding: 23.5px;
+    width: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+
+}
+
+.sub_encabezado{
+
+    position: fixed;
+    background-color: rgba(24, 38, 54, 0.85);
+    padding: 20px;
+    width: 100%;
+    top: 104px;
+    left: 0;
+    right: 0;
+    z-index: 2;
+
+}
+
+.letras_alta{
+
+    font-family: 'Open Sans', sans-serif;
+    font-size: small;
+    position: relative;
+    top: 200px;
+    margin-left: 650px;
+    color: #D9D9D9;
+    z-index: 1;
+
+
+}
+
+.juegos_destacados{
+
+    position: fixed;
+    background-color: rgba(23, 29, 37 , 0.75);
+    top: 250px;
+    left: 650px;
+    padding: 100px;
+    border-radius: 3px;
+    z-index: 1;
+
+}
+
+.crear-cuenta-container {
+    display: flex;
+    align-items: center;   /* Centra verticalmente el texto y el botón */
+    gap: 10px;             /* Espacio entre el texto y el botón */
+    margin-top: 150px;
+}
+
+.crear-cuenta-container p {
+    margin: 0;
+    font-style: italic;
+    font-family: "Motiva Sans", Arial, sans-serif;
+}
+
+/*MENU SLIDE (ALPHA)*/
+
+a{
+    color: #D9D9D9;
+    text-decoration: none;
+    font-family: "Motiva Sans", Arial, sans-serif;
+    font-size: small;
+    z-index: 3;
+}
+
+label{
+
+    font-family: "Motiva Sans", Arial, sans-serif;
+
+}
+
+input[type="text"] {
+
+    width: 450px;        /* ancho */
+    height: 30px;        /* alto */
+    font-size: 16px;     /* tamaño del texto */
+    left: -100px;
+    margin-bottom: 10px; /* espacio debajo */
+    display: block;      /* lo pone en una nueva línea */
+    border-radius: 2px;
+}
+
+
+input[type="password"] {
+
+    width: 450px;        /* ancho */
+    height: 30px;        /* alto */
+    font-size: 16px;     /* tamaño del texto */
+    margin-bottom: 10px; /* espacio debajo */
+    display: block;      /* lo pone en una nueva línea */
+    border-radius: 2px;
+}
+
+    /* Estilo para el botón */
+button {
+
+    width: 220px;
+    height: 35px;
+    font-size: 16px;
+    background-color: #2596be; /* color verde */
+    color: white;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+    /* Efecto al pasar el mouse */
+button:hover {
+
+    background-color: #1d9fcf;
+}
+
+#menu {
+
+    position: fixed;
+    margin-top: 129px;
+    right: -303px; 
+    width: 300px;
+    height: 100%;
+    background-color: rgba(24, 38, 54, 0.85);
+    /*border: 2px solid #2C74B3; Color ORIGINAL de arriba: rgba(23, 29, 37, 0.75);*/
+    /*border-radius: 10px;*/
+    color: #D9D9D9;
+    transition: right 0.7s;
+    z-index: 3; 
+}
+
+#menu a{
+
+    /*text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;*/
+    font-size: large;
+    z-index: 3;
+}
+
+#menu.active {
+
+    right: 0; 
+    z-index: 3;
+}
+
+#menu ul {
+
+    list-style: none;
+    padding: 0;
+    z-index: 3;
+}
+
+#menu ul li {
+
+    display: block;
+    padding: 15px;
+    text-align: left;
+    margin-left: 5%;
+    cursor: pointer;
+    z-index: 3;
+    transition: transform 0.2s ease; /* transición suave */
+
+}
+
+
+
+#menu ul li:hover {
+
+    transform: translateX(8px); /* se mueve levemente a la derecha */
+
+}
+
+#content {
+
+    margin-top: 7%;
+    margin-left: 2%;
+    padding: 2%;
+    z-index: 3;
+}
+
+#menu-toggle {
+
+    position: fixed;
+    top: 5px;
+    right: 20px;
+    cursor: pointer;
+    color: #D9D9D9;
+    padding: 1%;
+    margin-top: 1%;
+    margin-right: 1%;
+    /*background-color: rgba(24, 38, 54, 0.5);
+    /*border: 2px solid #2C74B3;
+    border-radius: 10px;*/
+    z-index: 3;
+    transition: transform 0.3s ease;
+
+    
+    /*text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;*/
+}
+
+#menu-toggle:hover {
+
+    transform: scale(1.2); /* Crece un poco */
+
+}
+
+
