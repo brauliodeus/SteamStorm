@@ -1,5 +1,0 @@
-express
-pg
-jsonwebtoken
-bcryptjs
-dotenv
