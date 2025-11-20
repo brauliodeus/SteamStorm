@@ -1,29 +1,36 @@
-// ====== CONFIGURACIÓN DEL SERVIDOR ======
+// ==========================================
+// 1. IMPORTACIONES Y CONFIGURACIÓN INICIAL
+// ==========================================
 const express = require("express");
 const cors = require("cors");
-const pool = require('./db'); // Importamos la DB para la ruta de crear tabla
-const authRoutes = require('./auth'); // <--- IMPORTANTE: Importamos tus rutas de login
+const pool = require('./db');       // Conexión a la Base de Datos (PostgreSQL)
+const authRoutes = require('./auth'); // Rutas de Login y Registro
 
-// Configuración para fetch (versiones nuevas de node-fetch)
+// Configuración de node-fetch (necesaria para versiones modernas)
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 const app = express();
 
-// --- CAMBIO CRÍTICO PARA RENDER ---
-// Render te asigna un puerto aleatorio en process.env.PORT
-const PORT = process.env.PORT || 3000; 
+// IMPORTANTE PARA RENDER: Usar el puerto que nos asigne el sistema
+const PORT = process.env.PORT || 3000;
 
-// Permite que cualquier origen acceda (útil para evitar problemas CORS al inicio)
-app.use(cors());
-app.use(express.json());
+// ==========================================
+// 2. MIDDLEWARES (Cables de conexión)
+// ==========================================
+app.use(cors());             // Permite que tu frontend (UCT) hable con este backend
+app.use(express.json());     // Permite leer los datos JSON que envían los formularios
 
-// ====== RUTAS DE AUTENTICACIÓN (LOGIN/REGISTRO) ======
-// Esto conecta tu archivo auth.js con el servidor
+// ==========================================
+// 3. RUTAS DE SISTEMA (Login y Base de Datos)
+// ==========================================
+
+// A. Conectar las rutas de Autenticación (Login/Registro)
+// Esto habilita: /api/auth/register y /api/auth/login
 app.use('/api/auth', authRoutes);
 
-// ====== RUTA MÁGICA: CREAR TABLA EN POSTGRES ======
-// Visita /crear-tabla una sola vez tras el deploy para configurar la DB
+// B. RUTA DE UTILIDAD: CREAR TABLA USERS
+// Ejecuta esta ruta una vez desplegado para crear la tabla en Render
 app.get('/crear-tabla', async (req, res) => {
     try {
         await pool.query(`
@@ -34,35 +41,41 @@ app.get('/crear-tabla', async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        res.send("✅ ¡Tabla 'users' creada con éxito en PostgreSQL!");
+        res.send("✅ ¡ÉXITO! La tabla 'users' ha sido creada en PostgreSQL.");
     } catch (error) {
         console.error(error);
         res.status(500).send("❌ Error al crear tabla: " + error.message);
     }
 });
 
-// ====== ENDPOINT: Datos de un juego individual (STEAM) ======
+// ==========================================
+// 4. RUTAS DE VIDEOJUEGOS (API STEAM)
+// ==========================================
+
+// Endpoint: Obtener detalles de un juego por ID
 app.get("/api/game/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    // console.log(`🟢 Solicitando datos de Steam para ID: ${id}`); // Opcional para limpiar logs
-
+    // 1. Obtener info básica
     const infoRes = await fetch(
       `https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`
     );
     const infoData = await infoRes.json();
 
+    // 2. Obtener reseñas
     const reviewRes = await fetch(
       `https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=recent`
     );
     const reviewData = await reviewRes.json();
 
+    // Validaciones
     if (!infoData[id]?.success || !infoData[id]?.data)
       throw new Error("Datos no válidos (info)");
     if (!reviewData?.query_summary)
       throw new Error("Datos no válidos (reviews)");
 
+    // Cálculos
     const total = reviewData.query_summary.total_reviews || 1;
     const porcentajePositivo = Math.round(
       (reviewData.query_summary.total_positive / total) * 100
@@ -90,16 +103,14 @@ app.get("/api/game/:id", async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    console.error("❌ Error detallado:", err.message);
-    res.status(500).json({ error: "Error al obtener datos" });
+    console.error("❌ Error al obtener juego:", err.message);
+    res.status(500).json({ error: "Error al obtener datos del juego" });
   }
 });
 
-// ====== ENDPOINT: Juegos mejor valorados (STEAM) ======
+// Endpoint: Obtener listado de Top Juegos
 app.get("/api/top-games", async (req, res) => {
   try {
-    // console.log("🟢 Obteniendo juegos más valorados...");
-
     const appIDs = [
       1091500, 1174180, 1086940, 1144200, 220, 
       292030, 1245620, 1623730, 381210, 550,
@@ -144,12 +155,14 @@ app.get("/api/top-games", async (req, res) => {
 
     res.json(mejores);
   } catch (error) {
-    console.error("❌ Error al obtener juegos top:", error.message);
+    console.error("❌ Error en Top Juegos:", error.message);
     res.status(500).json({ error: "Error al obtener juegos top." });
   }
 });
 
-// ====== INICIO DEL SERVIDOR ======
+// ==========================================
+// 5. ENCENDER EL SERVIDOR
+// ==========================================
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor SteamStorm corriendo en el puerto ${PORT}`);
+  console.log(`🚀 Servidor SteamStorm listo en puerto ${PORT}`);
 });
