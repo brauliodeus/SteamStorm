@@ -140,7 +140,7 @@ app.get("/api/game/:id", async (req, res) => {
   }
 });
 
-// B. Top Juegos (LA LISTA GIGANTE DE ÉXITOS)
+// B. Top Juegos
 app.get("/api/top-games", async (req, res) => {
   try {
     const appIDs = [
@@ -155,8 +155,6 @@ app.get("/api/top-games", async (req, res) => {
       1172470, // Apex Legends
       252490,  // Rust
       945360,  // Among Us
-
-      // --- OBRAS MAESTRAS ---
       1086940, // Baldur's Gate 3
       1245620, // Elden Ring
       1174180, // Red Dead Redemption 2
@@ -184,7 +182,6 @@ app.get("/api/top-games", async (req, res) => {
           );
           const infoData = await infoRes.json();
 
-          // Si falla uno, saltamos al siguiente
           if (!infoData || !infoData[id] || !infoData[id].success) {
               console.log(`⚠️ Salto ID ${id} (Bloqueo o error)`);
               continue; 
@@ -215,7 +212,6 @@ app.get("/api/top-games", async (req, res) => {
       }
     }
 
-    // Ordenamos y mostramos hasta 24 juegos
     const mejores = juegos
       .sort((a, b) => b.porcentaje_positivo - a.porcentaje_positivo)
       .slice(0, 24);

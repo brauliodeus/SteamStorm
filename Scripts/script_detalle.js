@@ -72,7 +72,7 @@ async function cargarReseñas() {
                     <p style="margin-top:10px; color: #ddd;">${r.comment}</p>
                     
                     <small style="color:#888; display:block; margin-top:5px; text-align:right;">
-                        📅 ${fechaLegible}
+                         ${fechaLegible}
                     </small>
                 </div>
             `;
@@ -87,7 +87,7 @@ function configurarVistaUsuario() {
     
     // Si NO hay token (Usuario es Invitado)
     if (!token) {
-        // A. Reemplazamos el formulario con un botón de Login
+        // A. Reemplaza el formulario con un botón de Login
         formulario.innerHTML = `
             <div style="text-align:center; padding: 20px;">
                 <h3 style="color:#ccc;">¿Quieres dejar tu opinión?</h3>
@@ -99,11 +99,11 @@ function configurarVistaUsuario() {
             </div>
         `;
 
-        // B. Ocultamos "Cerrar Sesión" del menú porque no tiene sentido
+        // B. Oculta "Cerrar Sesión" del menú
         if(menuCerrar) menuCerrar.parentElement.style.display = 'none';
     
     } else {
-        // Si hay usuario, dejamos todo normal
+        
         console.log("Usuario autenticado: Permitido comentar.");
     }
 }
@@ -135,6 +135,6 @@ async function enviarReseña() {
 
 // INICIAR
 document.addEventListener("DOMContentLoaded", () => {
-    configurarVistaUsuario(); // <--- Primero configuramos qué se ve
-    cargarDetalle();          // <--- Luego cargamos los datos
+    configurarVistaUsuario(); 
+    cargarDetalle();        
 });

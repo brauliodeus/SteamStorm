@@ -1,4 +1,4 @@
-// ====== VARIABLES (Buscamos los elementos en el HTML) ======
+// ====== VARIABLES ======
 const menu = document.getElementById('menu');
 const menuToggle = document.getElementById('menu-toggle');
 const perfil = document.getElementById('perfil');
@@ -10,7 +10,7 @@ const cerrarsesion = document.getElementById('cerrarsesion');
 
 // ====== EVENTOS CON PROTECCIÓN (Solo se activan si el elemento existe) ======
 
-// 1. Botón Hamburguesa del Menú
+// 1. Botón del Menú
 if (menu && menuToggle) {
     menuToggle.addEventListener('click', () => {
         menu.classList.toggle('active');

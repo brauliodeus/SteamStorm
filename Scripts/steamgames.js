@@ -1,5 +1,4 @@
 // ====== CONFIGURACIÓN ======
-// 👇 IMPORTANTE: Pega aquí tu URL de Render sin la barra final
 const API_URL = "https://steamstorm.onrender.com"; 
 
 const semanales = [292030, 1174180, 945360]; 
@@ -42,7 +41,6 @@ function crearCardJuego(info) {
         <p><strong>Valoración:</strong> ${generarEstrellas(info.porcentaje_positivo)}</p>
     `;
     div.addEventListener("click", () => {
-        // Si tienes página de detalle, descomenta esto:
         window.location.href = `detalle.html?id=${info.appid}`;
     });
     return div;
