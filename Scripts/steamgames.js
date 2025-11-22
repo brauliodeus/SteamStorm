@@ -1,12 +1,11 @@
 // ====== CONFIGURACIÓN ======
-// Aquí conectamos con tu servidor en Render
-const API_URL = "https://steamstorm.onrender.com/";
+// 👇 IMPORTANTE: Pega aquí tu URL de Render sin la barra final
+const API_URL = "https://steamstorm.onrender.com"; 
 
-const semanales = [292030, 1174180, 945360]; // Witcher 3, RDR2, Among Us
+const semanales = [292030, 1174180, 945360]; 
 
-// ====== FUNCIONES ======
+// ====== FUNCIONES DE PETICIÓN (FETCH) ======
 async function obtenerJuego(appid) {
-    // Usamos la variable API_URL
     const res = await fetch(`${API_URL}/api/game/${appid}`);
     return await res.json();
 }
@@ -16,18 +15,12 @@ async function obtenerJuegosTop() {
     return await res.json();
 }
 
-// Convierte valoración en estrellas
+// Función de estrellas
 function generarEstrellas(valoracion) {
     const mapping = {
-        "Overwhelmingly Positive": 100,
-        "Very Positive": 90,
-        "Positive": 80,
-        "Mostly Positive": 70,
-        "Mixed": 50,
-        "Mostly Negative": 30,
-        "Negative": 20,
-        "Very Negative": 10,
-        "Overwhelmingly Negative": 0
+        "Overwhelmingly Positive": 100, "Very Positive": 90, "Positive": 80,
+        "Mostly Positive": 70, "Mixed": 50, "Mostly Negative": 30,
+        "Negative": 20, "Very Negative": 10, "Overwhelmingly Negative": 0
     };
     const porcentaje = typeof valoracion === "string" ? (mapping[valoracion] || 50) : valoracion;
     const estrellasLlenas = Math.round(porcentaje / 20);
@@ -38,18 +31,18 @@ function generarEstrellas(valoracion) {
     return `${estrellasHTML} <span style="color:#D9D9D9;">(${porcentaje}%)</span>`;
 }
 
-// ====== CREACIÓN DE CARDS ======
+// Crear Tarjetas
 function crearCardJuego(info) {
     const div = document.createElement("div");
     div.classList.add("juego-card");
     div.innerHTML = `
         <img src="${info.header_image}" alt="${info.name}" class="juego-img">
         <h4>${info.name}</h4>
-        <p><strong>Género:</strong> ${info.genres && info.genres.length > 0 ? info.genres.join(", ") : "Desconocido"}</p>
+        <p><strong>Género:</strong> ${info.genres ? info.genres.join(", ") : "Varios"}</p>
         <p><strong>Valoración:</strong> ${generarEstrellas(info.porcentaje_positivo)}</p>
     `;
-    
     div.addEventListener("click", () => {
+        // Si tienes página de detalle, descomenta esto:
         window.location.href = `detalle.html?id=${info.appid}`;
     });
     return div;
@@ -69,12 +62,12 @@ function crearCardDestacado(info) {
     return div;
 }
 
-// ====== CARGA DE SECCIONES ======
+// Cargar Secciones
 async function cargarDestacados() {
     const contenedor = document.querySelector(".juegos_destacados");
-    if (!contenedor) return; // Evita errores si no existe el div
-
-    contenedor.innerHTML = "<p>Cargando juegos destacados...</p>";
+    if(!contenedor) return;
+    contenedor.innerHTML = "<p style='text-align:center'>Cargando servidor...</p>";
+    
     try {
         const juegosTop = await obtenerJuegosTop();
         const top3 = juegosTop.slice(0, 3);
@@ -90,24 +83,20 @@ async function cargarDestacados() {
         if (juegos.length > 0) {
             let index = 0;
             juegos[index].classList.add("activo");
-
             setInterval(() => {
                 juegos[index].classList.remove("activo");
                 index = (index + 1) % juegos.length;
                 juegos[index].classList.add("activo");
-            }, 7000);
+            }, 5000);
         }
     } catch (err) {
-        console.error(err);
-        contenedor.innerHTML = "<p style='color:red;'>Error al cargar destacados.</p>";
+        contenedor.innerHTML = "<p style='color:red; text-align:center'>Error cargando juegos.</p>";
     }
 }
 
 async function cargarTopJuegos() {
     const contenedor = document.querySelector(".juegos_top");
-    if (!contenedor) return;
-
-    contenedor.innerHTML = "<p>Cargando juegos top juegos...</p>";
+    if(!contenedor) return;
     try {
         const juegosTop = await obtenerJuegosTop();
         contenedor.innerHTML = "";
@@ -116,57 +105,23 @@ async function cargarTopJuegos() {
         }
     } catch (err) {
         console.error(err);
-        contenedor.innerHTML = "<p style='color:red;'>Error al cargar top juegos.</p>";
     }
 }
 
 async function cargarSeccion(ids, selector) {
     const contenedor = document.querySelector(selector);
-    if (!contenedor) return;
-
+    if(!contenedor) return;
     for (let id of ids) {
         try {
             const info = await obtenerJuego(id);
             contenedor.appendChild(crearCardJuego(info));
-        } catch (error) {
-            console.error(`Error cargando juego ${id}`, error);
-        }
+        } catch (error) { console.error(error); }
     }
 }
 
-async function cargarDetalle() {
-    // Solo ejecutamos esto si estamos en la página de detalle
-    const detalleDiv = document.getElementById("detalle");
-    if (!detalleDiv) return;
-
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
-    if (!id) return;
-
-    try {
-        // Usamos la variable API_URL aquí también
-        const res = await fetch(`${API_URL}/api/game/${id}`);
-        const data = await res.json();
-        
-        const div = document.createElement("div");
-        div.classList.add("destacado-card");
-        detalleDiv.innerHTML = `
-            <h1>${data.name}</h1>
-            <img src="${data.header_image}" style="width:60%; border-radius:5px;">
-            <p style="display:block;">${data.short_description}</p>
-            <p><strong>Valoración:</strong> ${data.valoracion} (${data.porcentaje_positivo}%)</p>
-            <p><strong>Total de reseñas:</strong> ${data.total_reviews}</p>
-        `;
-    } catch (error) {
-        console.error(error);
-        detalleDiv.innerHTML = "<p>Error cargando detalles.</p>";
-    }
-}
-
-// ====== EJECUCIÓN SEGURA ======
+// Iniciar
 document.addEventListener("DOMContentLoaded", () => {
     cargarDestacados();
     cargarTopJuegos();
     cargarSeccion(semanales, ".juegos_semanales");
-    cargarDetalle();
 });

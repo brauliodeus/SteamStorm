@@ -1,12 +1,12 @@
 // ==========================================
-// 1. IMPORTACIONES Y CONFIGURACIÓN
+// 1. IMPORTACIONES
 // ==========================================
 const express = require("express");
 const cors = require("cors");
-const pool = require('./db');       // Conexión a la Base de Datos
-const authRoutes = require('./auth'); // Rutas de Login/Registro
+const pool = require('./db');       // Conexión a PostgreSQL
+const authRoutes = require('./auth'); // Rutas de Login
 
-// Configuración de fetch para que funcione en el servidor
+// Configuración especial para usar fetch en Node.js
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
@@ -14,17 +14,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ==========================================
-// 2. MIDDLEWARES (OBLIGATORIOS)
+// 2. MIDDLEWARES (Cables vitales)
 // ==========================================
 app.use(cors());             
 app.use(express.json());     
 
 // ==========================================
-// 3. RUTAS DE USUARIOS (Login y DB)
+// 3. RUTAS DE USUARIO (LOGIN / DB)
 // ==========================================
 app.use('/api/auth', authRoutes);
 
-// Ruta para verificar/crear tabla
+// Ruta para verificar que la BD está viva
 app.get('/crear-tabla', async (req, res) => {
     try {
         await pool.query(`
@@ -35,29 +35,28 @@ app.get('/crear-tabla', async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        res.send("✅ Tabla 'users' verificada/creada.");
+        res.send("✅ Base de datos conectada y tabla users verificada.");
     } catch (error) {
-        res.status(500).send("Error: " + error.message);
+        res.status(500).send("Error BD: " + error.message);
     }
 });
 
 // ==========================================
-// 4. RUTAS DE VIDEOJUEGOS (ESTAS FALTABAN)
+// 4. RUTAS DE STEAM (¡ESTO ES LO QUE FALTABA!)
 // ==========================================
 
-// A. Obtener detalles de un juego individual
+// A. Obtener un juego individual
 app.get("/api/game/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    // 1. Info básica del juego
+    // Pedimos info a Steam
     const infoRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`);
     const infoData = await infoRes.json();
     
-    // 2. Reseñas del juego
     const reviewRes = await fetch(`https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=recent`);
     const reviewData = await reviewRes.json();
 
-    if (!infoData[id]?.success || !infoData[id]?.data) throw new Error("Datos no válidos");
+    if (!infoData[id]?.success || !infoData[id]?.data) throw new Error("Datos no válidos en Steam");
 
     const total = reviewData.query_summary.total_reviews || 1;
     const porcentajePositivo = Math.round((reviewData.query_summary.total_positive / total) * 100);
@@ -81,14 +80,14 @@ app.get("/api/game/:id", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Error al obtener datos del juego" });
+    res.status(500).json({ error: "Error al obtener juego de Steam" });
   }
 });
 
-// B. Obtener Top Juegos (Lista)
+// B. Obtener Lista de Top Juegos
 app.get("/api/top-games", async (req, res) => {
   try {
-    // Lista de IDs de juegos populares
+    // IDs de juegos populares
     const appIDs = [1091500, 1174180, 1086940, 1144200, 220, 292030, 1245620, 1623730, 381210, 550];
     const juegos = [];
 
@@ -112,17 +111,16 @@ app.get("/api/top-games", async (req, res) => {
         });
       }
     }
-    // Ordenar y enviar
     res.json(juegos.sort((a, b) => b.porcentaje_positivo - a.porcentaje_positivo).slice(0, 6));
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error al obtener juegos top." });
+    res.status(500).json({ error: "Error al conectar con Steam" });
   }
 });
 
 // ==========================================
-// 5. INICIO DEL SERVIDOR
+// 5. ENCENDER
 // ==========================================
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor COMPLETO corriendo en puerto ${PORT}`);
+  console.log(`🚀 Servidor Render listo en puerto ${PORT}`);
 });
