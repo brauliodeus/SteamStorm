@@ -3,8 +3,8 @@
 // ==========================================
 const express = require("express");
 const cors = require("cors");
-const pool = require('./db');       // Conexión a la Base de Datos
-const authRoutes = require('./auth'); // Rutas de Login/Registro
+const pool = require('./db');
+const authRoutes = require('./auth');
 
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -15,10 +15,10 @@ const PORT = process.env.PORT || 3000;
 // ==========================================
 // 2. MIDDLEWARES
 // ==========================================
-app.use(cors());             
-app.use(express.json());     
+app.use(cors());
+app.use(express.json());
 
-// Cabeceras para simular ser un navegador real y evitar bloqueos de Steam
+// Cabecera para engañar a Steam (Simula ser Chrome)
 const STEAM_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept': 'application/json',
@@ -26,7 +26,7 @@ const STEAM_HEADERS = {
 };
 
 // ==========================================
-// 3. RUTAS DE SISTEMA (Login y Tablas)
+// 3. RUTAS DE USUARIOS Y DB
 // ==========================================
 app.use('/api/auth', authRoutes);
 
@@ -41,7 +41,7 @@ app.get('/crear-tabla', async (req, res) => {
             );
         `);
         res.send("✅ Tabla 'users' verificada.");
-    } catch (error) { res.status(500).send("Error BD: " + error.message); }
+    } catch (error) { res.status(500).send(error.message); }
 });
 
 app.get('/crear-tabla-reviews', async (req, res) => {
@@ -56,16 +56,14 @@ app.get('/crear-tabla-reviews', async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        res.send("✅ Tabla 'reviews' verificada.");
-    } catch (error) { res.status(500).send("Error BD Reviews: " + error.message); }
+        res.send("✅ Tabla 'reviews' creada.");
+    } catch (error) { res.status(500).send(error.message); }
 });
 
-// ==========================================
-// 4. RUTAS DE RESEÑAS (DATABASE)
-// ==========================================
 app.post('/api/reviews', async (req, res) => {
     const { game_id, username, comment, rating } = req.body;
     if (!game_id || !username || !comment) return res.status(400).json({error: "Faltan datos"});
+    
     try {
         await pool.query(
             'INSERT INTO reviews (game_id, username, comment, rating) VALUES ($1, $2, $3, $4)',
@@ -87,23 +85,25 @@ app.get('/api/reviews/:game_id', async (req, res) => {
 });
 
 // ==========================================
-// 5. RUTAS DE STEAM API
+// 4. RUTAS DE STEAM (CON PROTECCIÓN ANTI-FALLO)
 // ==========================================
 
-// A. Obtener Detalle de un Juego
 app.get("/api/game/:id", async (req, res) => {
   const { id } = req.params;
   try {
+    // 1. Pedimos info a Steam (Con Headers falsos)
     const infoRes = await fetch(
-        `https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`,
+        `https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`, 
         { headers: STEAM_HEADERS }
     );
     const infoData = await infoRes.json();
 
+    // 2. Validación estricta: Si Steam devuelve null o error, lanzamos excepción controlada
     if (!infoData || !infoData[id] || !infoData[id].success) {
-        throw new Error("Steam bloqueó la petición o ID inválido");
+        throw new Error("Steam bloqueó la petición o el juego no existe");
     }
 
+    // 3. Pedimos reseñas
     const reviewRes = await fetch(
         `https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=recent`,
         { headers: STEAM_HEADERS }
@@ -134,59 +134,27 @@ app.get("/api/game/:id", async (req, res) => {
 
   } catch (err) {
     console.error(`❌ Error juego ${id}:`, err.message);
-    res.status(500).json({ error: "No se pudo obtener datos de Steam" });
+    // Devolvemos un error JSON en lugar de colgar el servidor
+    res.status(500).json({ error: "No se pudo obtener datos de Steam (Bloqueo de IP o ID inválido)" });
   }
 });
 
-// B. Obtener Lista de Top Juegos (LISTA MASIVA)
 app.get("/api/top-games", async (req, res) => {
   try {
-    const appIDs = [
-      // --- LOS 10 NUEVOS ---
-      413150,  // Stardew Valley
-      105600,  // Terraria
-      883710,  // Resident Evil 2 Remake
-      582010,  // Monster Hunter: World
-      374320,  // Dark Souls III
-      1687950, // Persona 5 Royal
-      1817070, // Marvel's Spider-Man Remastered
-      1172470, // Apex Legends
-      252490,  // Rust
-      945360,  // Among Us
-
-      // --- LOS CLÁSICOS QUE YA TENÍAS ---
-      1086940, // Baldur's Gate 3
-      1245620, // Elden Ring
-      1174180, // RDR2
-      292030,  // The Witcher 3
-      1593500, // God of War
-      814380,  // Sekiro
-      1091500, // Cyberpunk 2077
-      271590,  // GTA V
-      2050650, // RE4 Remake
-      1145360, // Hades
-      620,     // Portal 2
-      367520,  // Hollow Knight
-      550,     // Left 4 Dead 2
-      730,     // CS:GO
-      570      // Dota 2
-    ];
-
+    const appIDs = [1091500, 1174180, 1086940, 1144200, 220, 292030, 1245620, 1623730, 381210, 550];
     const juegos = [];
 
-    // Recorremos la lista
     for (const id of appIDs) {
       try {
-          // Solicitud a Steam
           const infoRes = await fetch(
             `https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`,
             { headers: STEAM_HEADERS }
           );
           const infoData = await infoRes.json();
 
-          // Si falla, saltamos al siguiente sin error
+          // Si este juego falla, lo saltamos y seguimos con el siguiente (continue)
           if (!infoData || !infoData[id] || !infoData[id].success) {
-              console.log(`⚠️ Salto ID ${id} (Posible bloqueo)`);
+              console.log(`⚠️ Steam bloqueó el ID ${id}, saltando...`);
               continue; 
           }
 
@@ -211,26 +179,22 @@ app.get("/api/top-games", async (req, res) => {
           });
 
       } catch (innerErr) {
-          console.error(`Error procesando juego ${id}:`, innerErr.message);
+          console.error(`Error obteniendo ID ${id}:`, innerErr.message);
       }
     }
 
-    // Ordenamos y devolvemos los TOP 24 (suficientes para llenar pantalla)
-    const mejores = juegos
-      .sort((a, b) => b.porcentaje_positivo - a.porcentaje_positivo)
-      .slice(0, 24);
-
-    res.json(mejores);
+    // Si Steam nos bloqueó todo, devolvemos lista vacía en vez de error 500
+    res.json(juegos.sort((a, b) => b.porcentaje_positivo - a.porcentaje_positivo).slice(0, 6));
 
   } catch (error) {
-    console.error("❌ Error global Top Juegos:", error.message);
-    res.json([]);
+    console.error("❌ Error global en Top Juegos:", error.message);
+    res.status(500).json({ error: "Error al obtener juegos top." });
   }
 });
 
 // ==========================================
-// 6. INICIO DEL SERVIDOR
+// 5. INICIO
 // ==========================================
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor cargado con ${PORT} juegos corriendo.`);
+  console.log(`🚀 Servidor SteamStorm BLINDADO corriendo en puerto ${PORT}`);
 });
