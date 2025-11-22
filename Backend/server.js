@@ -3,9 +3,10 @@
 // ==========================================
 const express = require("express");
 const cors = require("cors");
-const pool = require('./db');       // Conexión a PostgreSQL
-const authRoutes = require('./auth'); // Rutas de Login/Registro
+const pool = require('./db');       // Conexión a Base de Datos
+const authRoutes = require('./auth'); // Rutas de Login
 
+// Configuración de fetch para Node.js
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
@@ -13,16 +14,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ==========================================
-// 2. MIDDLEWARES (Obligatorios)
+// 2. MIDDLEWARES
 // ==========================================
 app.use(cors());             
 app.use(express.json());     
 
 // ==========================================
-// 3. RUTAS DE USUARIOS (Auth y DB)
+// 3. RUTAS DE SISTEMA (LOGIN / DB)
 // ==========================================
 app.use('/api/auth', authRoutes);
 
+// Ruta auxiliar para verificar la tabla
 app.get('/crear-tabla', async (req, res) => {
     try {
         await pool.query(`
@@ -33,23 +35,25 @@ app.get('/crear-tabla', async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        res.send("✅ Tabla verificada/creada");
+        res.send("✅ Tabla 'users' verificada/creada en PostgreSQL.");
     } catch (error) {
         res.status(500).send("Error: " + error.message);
     }
 });
 
 // ==========================================
-// 4. RUTAS DE STEAM (¡ESTAS TE FALTABAN!)
+// 4. RUTAS DE VIDEOJUEGOS (STEAM API)
 // ==========================================
 
-// Endpoint: Un juego específico
+// A. Obtener detalles de un juego
 app.get("/api/game/:id", async (req, res) => {
   const { id } = req.params;
   try {
+    // 1. Info del juego
     const infoRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`);
     const infoData = await infoRes.json();
     
+    // 2. Reseñas
     const reviewRes = await fetch(`https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=recent`);
     const reviewData = await reviewRes.json();
 
@@ -76,15 +80,14 @@ app.get("/api/game/:id", async (req, res) => {
       genres: infoData[id].data.genres ? infoData[id].data.genres.map(g => g.description) : ["Desconocido"],
     });
   } catch (err) {
-    console.error(err); // Log en Render para ver qué pasa
-    res.status(500).json({ error: "Error al obtener datos" });
+    console.error(err);
+    res.status(500).json({ error: "Error al obtener datos del juego" });
   }
 });
 
-// Endpoint: Top Juegos
+// B. Obtener Top Juegos
 app.get("/api/top-games", async (req, res) => {
   try {
-    // IDs: Cyberpunk, RDR2, BG3, ReadyOrNot, HL2, Witcher3, EldenRing, LethalCo, DBD, L4D2
     const appIDs = [1091500, 1174180, 1086940, 1144200, 220, 292030, 1245620, 1623730, 381210, 550];
     const juegos = [];
 
@@ -108,7 +111,6 @@ app.get("/api/top-games", async (req, res) => {
         });
       }
     }
-    // Ordenar por mejor valoración y devolver los top 6
     res.json(juegos.sort((a, b) => b.porcentaje_positivo - a.porcentaje_positivo).slice(0, 6));
   } catch (error) {
     console.error(error);
@@ -117,8 +119,8 @@ app.get("/api/top-games", async (req, res) => {
 });
 
 // ==========================================
-// 5. INICIO
+// 5. INICIO DEL SERVIDOR
 // ==========================================
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor SteamStorm corriendo en puerto ${PORT}`);
+  console.log(`🚀 Servidor completo corriendo en puerto ${PORT}`);
 });

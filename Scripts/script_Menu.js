@@ -1,41 +1,48 @@
+// ====== SELECCIÓN DE ELEMENTOS ======
 const menu = document.getElementById('menu');
 const menuToggle = document.getElementById('menu-toggle');
 const perfil = document.getElementById('perfil');
-const inicio = document.getElementById('main');
+const inicio = document.getElementById('main'); 
 const nosotros = document.getElementById('nosotros');
-//const direcciones = document.getElementById('billetera');
 const soporte = document.getElementById('soporte');
 const privacidad = document.getElementById('privacidad');
-//const cerrarsesion = document.getElementById('cerrarsesion');
+const cerrarsesion = document.getElementById('cerrarsesion');
 
-menuToggle.addEventListener('click', () => {
-    menu.classList.toggle('active');
-});
+// ====== EVENTOS SEGUROS (Verificamos con 'if' si existen) ======
 
-perfil.addEventListener('click', () => {
-    console.log('Clic en Perfil');
-});
+if (menu && menuToggle) {
+    menuToggle.addEventListener('click', () => {
+        menu.classList.toggle('active');
+    });
+}
 
-inicio.addEventListener('click', () => {
-    console.log('Clic en Config');
-});
+if (perfil) {
+    perfil.addEventListener('click', () => console.log('Clic en Perfil'));
+}
 
-privacidad.addEventListener('click', () => {
-    console.log('Clic en Ganancias');
-});
+if (inicio) {
+    inicio.addEventListener('click', () => console.log('Clic en Inicio'));
+}
 
-nosotros.addEventListener('click', () => {
-    console.log('Clic en Billetera');
-});
+if (privacidad) {
+    privacidad.addEventListener('click', () => console.log('Clic en Privacidad'));
+}
 
-soporte.addEventListener('click', () => {
-    console.log('Clic en soporte');
-});
+if (nosotros) {
+    nosotros.addEventListener('click', () => console.log('Clic en Nosotros'));
+}
 
-//politica.addEventListener('click', () => {
-    //console.log('Clic en politica ');
-//});
+if (soporte) {
+    soporte.addEventListener('click', () => console.log('Clic en Soporte'));
+}
 
-//cerrarsesion.addEventListener('click', () => {
-    //console.log('Clic en cerrarcesion ');
-//});
+// LOGOUT: Solo agregamos el evento si el botón existe
+if (cerrarsesion) {
+    cerrarsesion.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        alert("¡Hasta luego!");
+        window.location.href = "../Guest/inicio_guest.html";
+    });
+}
