@@ -3,10 +3,10 @@
 // ==========================================
 const express = require("express");
 const cors = require("cors");
-const pool = require('./db');       // Conexión a Base de Datos
-const authRoutes = require('./auth'); // Rutas de Login
+const pool = require('./db');       // Conexión a la Base de Datos
+const authRoutes = require('./auth'); // Rutas de Login/Registro
 
-// Configuración de fetch para Node.js
+// Configuración de fetch para que funcione en el servidor
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
@@ -14,17 +14,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ==========================================
-// 2. MIDDLEWARES
+// 2. MIDDLEWARES (OBLIGATORIOS)
 // ==========================================
 app.use(cors());             
 app.use(express.json());     
 
 // ==========================================
-// 3. RUTAS DE SISTEMA (LOGIN / DB)
+// 3. RUTAS DE USUARIOS (Login y DB)
 // ==========================================
 app.use('/api/auth', authRoutes);
 
-// Ruta auxiliar para verificar la tabla
+// Ruta para verificar/crear tabla
 app.get('/crear-tabla', async (req, res) => {
     try {
         await pool.query(`
@@ -35,25 +35,25 @@ app.get('/crear-tabla', async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        res.send("✅ Tabla 'users' verificada/creada en PostgreSQL.");
+        res.send("✅ Tabla 'users' verificada/creada.");
     } catch (error) {
         res.status(500).send("Error: " + error.message);
     }
 });
 
 // ==========================================
-// 4. RUTAS DE VIDEOJUEGOS (STEAM API)
+// 4. RUTAS DE VIDEOJUEGOS (ESTAS FALTABAN)
 // ==========================================
 
-// A. Obtener detalles de un juego
+// A. Obtener detalles de un juego individual
 app.get("/api/game/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    // 1. Info del juego
+    // 1. Info básica del juego
     const infoRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`);
     const infoData = await infoRes.json();
     
-    // 2. Reseñas
+    // 2. Reseñas del juego
     const reviewRes = await fetch(`https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=recent`);
     const reviewData = await reviewRes.json();
 
@@ -85,9 +85,10 @@ app.get("/api/game/:id", async (req, res) => {
   }
 });
 
-// B. Obtener Top Juegos
+// B. Obtener Top Juegos (Lista)
 app.get("/api/top-games", async (req, res) => {
   try {
+    // Lista de IDs de juegos populares
     const appIDs = [1091500, 1174180, 1086940, 1144200, 220, 292030, 1245620, 1623730, 381210, 550];
     const juegos = [];
 
@@ -111,6 +112,7 @@ app.get("/api/top-games", async (req, res) => {
         });
       }
     }
+    // Ordenar y enviar
     res.json(juegos.sort((a, b) => b.porcentaje_positivo - a.porcentaje_positivo).slice(0, 6));
   } catch (error) {
     console.error(error);
@@ -122,5 +124,5 @@ app.get("/api/top-games", async (req, res) => {
 // 5. INICIO DEL SERVIDOR
 // ==========================================
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor completo corriendo en puerto ${PORT}`);
+  console.log(`🚀 Servidor COMPLETO corriendo en puerto ${PORT}`);
 });

@@ -1,14 +1,14 @@
-// ====== SELECCIÓN DE ELEMENTOS ======
+// ====== VARIABLES ======
 const menu = document.getElementById('menu');
 const menuToggle = document.getElementById('menu-toggle');
 const perfil = document.getElementById('perfil');
-const inicio = document.getElementById('main'); 
+const inicio = document.getElementById('main');
 const nosotros = document.getElementById('nosotros');
 const soporte = document.getElementById('soporte');
 const privacidad = document.getElementById('privacidad');
 const cerrarsesion = document.getElementById('cerrarsesion');
 
-// ====== EVENTOS SEGUROS (Verificamos con 'if' si existen) ======
+// ====== EVENTOS (SOLO SI EXISTEN) ======
 
 if (menu && menuToggle) {
     menuToggle.addEventListener('click', () => {
@@ -16,27 +16,13 @@ if (menu && menuToggle) {
     });
 }
 
-if (perfil) {
-    perfil.addEventListener('click', () => console.log('Clic en Perfil'));
-}
+if (perfil) perfil.addEventListener('click', () => console.log('Clic en Perfil'));
+if (inicio) inicio.addEventListener('click', () => console.log('Clic en Inicio'));
+if (privacidad) privacidad.addEventListener('click', () => console.log('Clic en Privacidad'));
+if (nosotros) nosotros.addEventListener('click', () => console.log('Clic en Nosotros'));
+if (soporte) soporte.addEventListener('click', () => console.log('Clic en Soporte'));
 
-if (inicio) {
-    inicio.addEventListener('click', () => console.log('Clic en Inicio'));
-}
-
-if (privacidad) {
-    privacidad.addEventListener('click', () => console.log('Clic en Privacidad'));
-}
-
-if (nosotros) {
-    nosotros.addEventListener('click', () => console.log('Clic en Nosotros'));
-}
-
-if (soporte) {
-    soporte.addEventListener('click', () => console.log('Clic en Soporte'));
-}
-
-// LOGOUT: Solo agregamos el evento si el botón existe
+// LOGOUT (Solo agregamos el evento si el botón existe en esta página)
 if (cerrarsesion) {
     cerrarsesion.addEventListener('click', (e) => {
         e.preventDefault();
