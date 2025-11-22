@@ -44,7 +44,8 @@ async function cargarDetalle() {
     }
 }
 
-// 2. CARGAR RESEÑAS
+// 2. CArgar Reseñas
+
 async function cargarReseñas() {
     const lista = document.getElementById("lista-opiniones");
     try {
@@ -58,6 +59,10 @@ async function cargarReseñas() {
         }
 
         reviews.forEach(r => {
+            // fecha y hora
+            const fecha = new Date(r.created_at);
+            const fechaLegible = fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
             lista.innerHTML += `
                 <div class="review-card" style="background: #1e1e2e; margin: 10px 0; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff;">
                     <div style="display:flex; justify-content:space-between;">
@@ -65,7 +70,10 @@ async function cargarReseñas() {
                         <span style="color:gold;">${r.rating}% ⭐</span>
                     </div>
                     <p style="margin-top:10px; color: #ddd;">${r.comment}</p>
-                    <small style="color:#888;">${new Date(r.created_at).toLocaleDateString()}</small>
+                    
+                    <small style="color:#888; display:block; margin-top:5px; text-align:right;">
+                        📅 ${fechaLegible}
+                    </small>
                 </div>
             `;
         });
