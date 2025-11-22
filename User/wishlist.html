@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Lista de Deseados | SteamStorm</title>
+    
+    <script src="../Scripts/auth_guard.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/style_inicio.css">
+    
+    <style>
+        /* Título específico para esta página */
+        .titulo-wishlist {
+            text-align: center;
+            margin-top: 120px;
+            color: #66fcf1;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        /* Ajuste para mensaje de lista vacía */
+        .empty-message {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #a8b6c1;
+            padding: 50px;
+            grid-column: 1 / -1; /* Ocupa todo el ancho de la grilla */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="encabezado">
+        <img src="../Images/steamstorm_logo_alpha2.png" alt="Logo" width="200" height="54">
+    </div>
+    
+    <div id="menu">
+        <ul>
+            <li class="fa-regular fa-window-maximize"><a href="inicio_user.html"> | Inicio </a></li>
+            <li class="fa-regular fa-user"><a href="perfil_user.html"> | Mi Perfil </a></li>
+            <li class="fa-regular fa-heart" style="color:#66fcf1;"><a href="wishlist.html"> | Lista de Deseados </a></li>
+            <li class="fa-regular fa-compass"><a href="nosotros_user.html"> | Sobre nosotros</a></li>
+            <li class="fa-regular fa-thumbs-up"><a href="privacidad_user.html"> | Política de privacidad</a></li>
+            <li class="fa-regular fa-comment"><a href="soporte_user.html"> | Soporte</a></li>
+            <li class="fa-regular fa-rectangle-xmark"> <a href="#" id="cerrarsesion"> | Cerrar sesión</a></li>
+        </ul>
+    </div>
+    <div id="menu-toggle"><i class="fas fa-list-ul" style="color: #D9D9D9;"></i></div> 
+
+    <h2 class="titulo-wishlist">❤️ Mis Juegos Guardados</h2>
+    
+    <div id="wishlist-grid" class="juegos_top">
+        <p style="text-align:center; width:100%;">Cargando tu lista...</p>
+    </div>
+
+
+    <script src="../Scripts/script_Menu.js"></script>
+    <script src="../Scripts/script_wishlist.js"></script>
+
+</body>
+</html>

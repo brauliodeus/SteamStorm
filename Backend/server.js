@@ -3,8 +3,8 @@
 // ==========================================
 const express = require("express");
 const cors = require("cors");
-const pool = require('./db');
-const authRoutes = require('./auth');
+const pool = require('./db');       // Conexión a la Base de Datos
+const authRoutes = require('./auth'); // Rutas de Login/Registro
 
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -18,6 +18,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());             
 app.use(express.json());     
 
+// Cabeceras para evitar bloqueos de Steam
 const STEAM_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept': 'application/json',
@@ -29,11 +30,11 @@ const STEAM_HEADERS = {
 // ==========================================
 app.use('/api/auth', authRoutes);
 
-// --- CREACIÓN DE TABLAS (Solo ejecutar una vez) ---
-
+// --- RUTA MAESTRA PARA CREAR TODAS LAS TABLAS ---
+// Visita: https://tu-app.onrender.com/crear-tablas-general
 app.get('/crear-tablas-general', async (req, res) => {
     try {
-        // 1. Tabla Usuarios
+        // 1. Usuarios
         await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -42,7 +43,7 @@ app.get('/crear-tablas-general', async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        // 2. Tabla Reseñas
+        // 2. Reseñas
         await pool.query(`
             CREATE TABLE IF NOT EXISTS reviews (
                 id SERIAL PRIMARY KEY,
@@ -53,7 +54,7 @@ app.get('/crear-tablas-general', async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        // 3. Tabla Wishlist (NUEVA)
+        // 3. Wishlist (Lista de Deseados)
         await pool.query(`
             CREATE TABLE IF NOT EXISTS wishlist (
                 id SERIAL PRIMARY KEY,
@@ -62,21 +63,22 @@ app.get('/crear-tablas-general', async (req, res) => {
                 game_name VARCHAR(255),
                 game_image TEXT,
                 added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(username, game_id) -- Evita duplicados
+                UNIQUE(username, game_id) 
             );
         `);
-        res.send("✅ Todas las tablas (Users, Reviews, Wishlist) verificadas.");
+        res.send("✅ Tablas (Users, Reviews, Wishlist) verificadas/creadas.");
     } catch (error) { res.status(500).send("Error BD: " + error.message); }
 });
 
 // ==========================================
-// 4. RUTAS DE WISHLIST (LISTA DE DESEADOS) [NUEVO]
+// 4. RUTAS DE WISHLIST (LISTA DE DESEADOS)
 // ==========================================
 
-// Agregar a favoritos
+// Agregar juego a favoritos
 app.post('/api/wishlist/add', async (req, res) => {
     const { username, game_id, game_name, game_image } = req.body;
     try {
+        // 'ON CONFLICT DO NOTHING' evita errores si ya está guardado
         await pool.query(
             'INSERT INTO wishlist (username, game_id, game_name, game_image) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
             [username, game_id, game_name, game_image]
@@ -85,7 +87,7 @@ app.post('/api/wishlist/add', async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// Eliminar de favoritos
+// Eliminar juego de favoritos
 app.delete('/api/wishlist/remove', async (req, res) => {
     const { username, game_id } = req.body;
     try {
@@ -97,7 +99,7 @@ app.delete('/api/wishlist/remove', async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// Verificar si un juego ya es favorito (Para pintar el corazón)
+// Verificar si un juego específico está en favoritos (para el botón del corazón)
 app.get('/api/wishlist/check/:username/:game_id', async (req, res) => {
     const { username, game_id } = req.params;
     try {
@@ -106,6 +108,18 @@ app.get('/api/wishlist/check/:username/:game_id', async (req, res) => {
             [username, game_id]
         );
         res.json({ is_in_wishlist: result.rows.length > 0 });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+// Obtener TODA la lista de un usuario (Para la página wishlist.html)
+app.get('/api/wishlist/getall/:username', async (req, res) => {
+    const { username } = req.params;
+    try {
+        const result = await pool.query(
+            'SELECT * FROM wishlist WHERE username = $1 ORDER BY added_at DESC',
+            [username]
+        );
+        res.json(result.rows);
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
@@ -135,6 +149,8 @@ app.get('/api/reviews/:game_id', async (req, res) => {
 // ==========================================
 // 6. RUTAS DE STEAM API
 // ==========================================
+
+// A. Detalle
 app.get("/api/game/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -171,9 +187,13 @@ app.get("/api/game/:id", async (req, res) => {
   }
 });
 
+// B. Top Juegos
 app.get("/api/top-games", async (req, res) => {
   try {
-    const appIDs = [413150, 105600, 883710, 582010, 374320, 1687950, 1817070, 1172470, 252490, 945360, 1086940, 1245620, 1174180, 292030, 1593500, 814380, 1091500, 271590, 2050650, 1145360, 620, 367520, 550, 730, 570];
+    const appIDs = [
+      413150, 105600, 883710, 582010, 374320, 1687950, 1817070, 1172470, 252490, 945360, // Nuevos
+      1086940, 1245620, 1174180, 292030, 1593500, 814380, 1091500, 271590, 2050650, 1145360, 620, 367520, 550, 730, 570 // Clásicos
+    ];
     const juegos = [];
 
     for (const id of appIDs) {
@@ -204,4 +224,7 @@ app.get("/api/top-games", async (req, res) => {
   } catch (error) { res.json([]); }
 });
 
-app.listen(PORT, () => { console.log(`🚀 Servidor listo en puerto ${PORT}`); });
+// ==========================================
+// 7. INICIO
+// ==========================================
+app.listen(PORT, () => { console.log(`🚀 Servidor Full Stack listo en puerto ${PORT}`); });
