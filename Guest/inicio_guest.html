@@ -7,47 +7,53 @@
     <link rel="icon" type="image/png" href="../Images/favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="../CSS/style_inicio.css">
 </head>
 <body>
 
     <div class="encabezado">
-        <img src="../Images/steamstorm_logo_alpha2.png" alt="" width="200,1" height="53,7">
+        <img src="../Images/steamstorm_logo_alpha2.png" alt="SteamStorm Logo" width="200" height="54">
     </div>
-    <div class="sub_encabezado"> <a href="#topjuegos" class="espaciado_letras_sub">Top juegos</a> 
-        <a href="#juegossemanales" class="espaciado_letras_sub">Juegos semanales</a></div>
+    
+    <div class="sub_encabezado"> 
+        <a href="#topjuegos" class="espaciado_letras_sub">Top juegos</a> 
+        <a href="#juegossemanales" class="espaciado_letras_sub">Juegos semanales</a>
+    </div>
 
     <div id="menu">
-    <ul>
-
-        <li class="fa-regular fa-user"><a href="iniciosesion.html"> | Iniciar Sesion</a></li>
-        <li class="fa-regular fa-compass"><a href="../Guest/nosotros_guest.html"> | Sobre nosotros</a></li>
-        <li class="fa-regular fa-thumbs-up"><a href="../Guest/privacidad_guest.html"> | Politíca de privacidad</a></li>
-        <li class="fa-regular fa-comment"><a href="../Guest/soporte_guest.html"> | Soporte</a></li>
-
-    </ul>
+        <ul>
+            <li class="fa-regular fa-user"><a href="iniciosesion.html"> | Iniciar Sesión</a></li>
+            <li class="fa-regular fa-id-card"><a href="crearcuenta.html"> | Registrarse</a></li>
+            <li class="fa-regular fa-compass"><a href="nosotros_guest.html"> | Sobre nosotros</a></li>
+            <li class="fa-regular fa-thumbs-up"><a href="privacidad_guest.html"> | Política de privacidad</a></li>
+            <li class="fa-regular fa-comment"><a href="soporte_guest.html"> | Soporte</a></li>
+        </ul>
     </div>
 
     <div id="menu-toggle"><i class="fas fa-list-ul" style="color: #D9D9D9;"></i></div> 
 
-    <div class="letras_alta"><h3>JUEGOS DESTACADOS</h3></div>
-    <section class="destacados">
-        <div class="juegos_destacados"></div>
-    </section>
-
-    <div class="letras_topjuegos"><h3 id = "topjuegos">TOP JUEGOS</h3></div>
+    <div class="letras_destacado"><h3>🔥 JUEGOS DESTACADOS (GOTY) 🔥</h3></div>
+    
+    <div class="juegos_destacados">
+        <button class="carousel-btn carousel-btn--left">❮</button>
+        
+        <div class="carousel-track-container">
+            <ul class="carousel-track" id="track-destacados">
+                </ul>
+        </div>
+        
+        <button class="carousel-btn carousel-btn--right">❯</button>
+    </div>
+    <div class="letras_top"><h3 id="topjuegos">🏆 TOP MEJORES VALORADOS</h3></div>
     <div class="juegos_top"></div>
 
-
-    <div class="letras_juegossemanales"><h3 id = "juegossemanales">JUEGOS SEMANALES</h3></div>
+    <div class="letras_semanales"><h3 id="juegossemanales">📅 JUEGOS SEMANALES</h3></div>
     <div class="juegos_semanales"></div>
 
-    <div></div>
+    <script src="../Scripts/script_Menu.js"></script>
+    
+    <script src="../Scripts/steamgames.js"></script>
 
-
-<script src="../Scripts/script_Menu.js"></script>
-<script src="../Scripts/steamgames.js"></script>
-</body>
-</html>
 </body>
 </html>
