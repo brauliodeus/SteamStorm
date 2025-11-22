@@ -9,45 +9,66 @@
 
     <link rel="stylesheet" href="../CSS/style_detalle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        .form-review { background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .form-review textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; background: #2a2a2a; color: white; border: 1px solid #444; }
+        .form-review select { padding: 10px; border-radius: 5px; background: #2a2a2a; color: white; border: none; }
+        .btn-submit { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-submit:hover { background: #0056b3; }
+        .review-card { background: #1e1e2e; margin: 10px 0; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff; }
+    </style>
 </head>
 <body>
-    <div class="detalle-container">
-        <div id="detalle"></div>
+
+    <div class="encabezado">
+        <img src="../Images/steamstorm_logo_alpha2.png" alt="Logo" width="200" height="53">
+    </div>
+    
+    <div class="sub_encabezado">
+        <a href="inicio_user.html" class="espaciado_letras_sub"> <i class="fas fa-arrow-left"></i> Volver al Inicio</a>
+    </div>
+
+    <div id="menu">
+        <ul>
+            <li class="fa-regular fa-user"><a href="perfil_user.html"> | Perfil</a></li>
+            <li class="fa-regular fa-compass"><a href="nosotros_user.html"> | Sobre nosotros</a></li>
+            <li class="fa-regular fa-thumbs-up"><a href="privacidad_user.html"> | Política de privacidad</a></li>
+            <li class="fa-regular fa-comment"><a href="soporte_user.html"> | Soporte</a></li>
+            <li class="fa-regular fa-rectangle-xmark"> <a href="#" id="cerrarsesion"> | Cerrar sesión</a></li>
+        </ul>
+    </div>
+
+    <div id="menu-toggle"><i class="fas fa-list-ul" style="color: #D9D9D9;"></i></div> 
+
+    <div class="detalle-container" style="margin-top: 20px; padding: 20px; color: white;">
+        
+        <div id="detalle-juego-content">
+            <h2 style="text-align:center;">Cargando información...</h2>
+        </div>
+
         <div id="opiniones" style="margin-top:50px;">
-            <h2>Opiniones de los usuarios</h2>
+            <h2><i class="fas fa-comments"></i> Opiniones de la comunidad</h2>
+            
+            <div class="form-review">
+                <h3>Deja tu opinión:</h3>
+                <select id="rating-input">
+                    <option value="100">⭐⭐⭐⭐⭐ (Excelente)</option>
+                    <option value="80">⭐⭐⭐⭐ (Muy bueno)</option>
+                    <option value="60">⭐⭐⭐ (Regular)</option>
+                    <option value="40">⭐⭐ (Malo)</option>
+                    <option value="20">⭐ (Terrible)</option>
+                </select>
+                <textarea id="comment-input" rows="3" placeholder="¿Qué te pareció este juego?"></textarea>
+                <button class="btn-submit" onclick="enviarReseña()">Publicar Reseña</button>
+            </div>
+
             <div id="lista-opiniones"></div>
         </div>
     </div>
 
-    <div class="encabezado">
-        <img src="../Images/steamstorm_logo_alpha2.png" alt="" width="200,1" height="53,7">
-    </div>
-    <div class="sub_encabezado"><a href="inicio_user.html" class="espaciado_letras_sub">Volver</a></div>
-
-    <div id="menu">
-    <ul>
-        <!--<li></li>-->
-        <li class="fa-regular fa-user"><a href="perfil_user.html"> | Perfil</a></li>
-        <li class="fa-regular fa-compass"><a href="nosotros_user.html"> | Sobre nosotros</a></li>
-        <li class="fa-regular fa-thumbs-up"><a href="privacidad_user.html"> | Politíca de privacidad</a></li>
-        <li class="fa-regular fa-comment"><a href="soporte_user.html"> | Soporte</a></li>
-        <!--<li> <a>Eliminar cuenta</a></li>-->
-
-        <li class="fa-regular fa-rectangle-xmark"> <a href="../Guest/inicio_guest.html"> | Cerrar sesion</a></li>
-
-        <!--
-        <i class="fa-regular fa-rectangle-xmark">Categorias | Juegos populares| Mejor puntuados</i>
-        <li class="fa-regular fa-square-caret-down"></li>
-        <i class="fa-regular fa-comment"></i>
-        <li class="fa-regular fa-comments"><a> | Soporte</a></li>
-        -->
-    </ul>
-    </div>
-
-    <div id="menu-toggle"><i class="fas fa-list-ul" style="color: #D9D9D9;"></i></div> 
-    <div id="detalle" class="juego_detalle"></div>
-
     <script src="../Scripts/script_Menu.js"></script>
-    <script src="../Scripts/steamgames.js"></script>
+    <script src="../Scripts/script_detalle.js"></script>
 </body>
 </html>
