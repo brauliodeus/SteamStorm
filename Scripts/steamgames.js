@@ -1,14 +1,18 @@
-// ====== CONFIGURACIÓN Y LISTAS ======
+// ====== CONFIGURACIÓN ======
+// Aquí conectamos con tu servidor en Render
+const API_URL = "https://steamstorm.onrender.com/";
+
 const semanales = [292030, 1174180, 945360]; // Witcher 3, RDR2, Among Us
 
 // ====== FUNCIONES ======
 async function obtenerJuego(appid) {
-    const res = await fetch(`http://localhost:3000/api/game/${appid}`);
+    // Usamos la variable API_URL
+    const res = await fetch(`${API_URL}/api/game/${appid}`);
     return await res.json();
 }
 
 async function obtenerJuegosTop() {
-    const res = await fetch("http://localhost:3000/api/top-games");
+    const res = await fetch(`${API_URL}/api/top-games`);
     return await res.json();
 }
 
@@ -44,7 +48,7 @@ function crearCardJuego(info) {
         <p><strong>Género:</strong> ${info.genres && info.genres.length > 0 ? info.genres.join(", ") : "Desconocido"}</p>
         <p><strong>Valoración:</strong> ${generarEstrellas(info.porcentaje_positivo)}</p>
     `;
-    // 🔗 Permite pinchar solo los juegos normales y top
+    
     div.addEventListener("click", () => {
         window.location.href = `detalle.html?id=${info.appid}`;
     });
@@ -62,13 +66,14 @@ function crearCardDestacado(info) {
             <p><strong>Valoración:</strong> ${generarEstrellas(info.porcentaje_positivo)}</p>
         </div>
     `;
-    // 🚫 No agregamos click para los destacados
     return div;
 }
 
 // ====== CARGA DE SECCIONES ======
 async function cargarDestacados() {
     const contenedor = document.querySelector(".juegos_destacados");
+    if (!contenedor) return; // Evita errores si no existe el div
+
     contenedor.innerHTML = "<p>Cargando juegos destacados...</p>";
     try {
         const juegosTop = await obtenerJuegosTop();
@@ -82,21 +87,26 @@ async function cargarDestacados() {
             juegos.push(card);
         }
 
-        let index = 0;
-        juegos[index].classList.add("activo");
-
-        setInterval(() => {
-            juegos[index].classList.remove("activo");
-            index = (index + 1) % juegos.length;
+        if (juegos.length > 0) {
+            let index = 0;
             juegos[index].classList.add("activo");
-        }, 7000);
+
+            setInterval(() => {
+                juegos[index].classList.remove("activo");
+                index = (index + 1) % juegos.length;
+                juegos[index].classList.add("activo");
+            }, 7000);
+        }
     } catch (err) {
+        console.error(err);
         contenedor.innerHTML = "<p style='color:red;'>Error al cargar destacados.</p>";
     }
 }
 
 async function cargarTopJuegos() {
     const contenedor = document.querySelector(".juegos_top");
+    if (!contenedor) return;
+
     contenedor.innerHTML = "<p>Cargando juegos top juegos...</p>";
     try {
         const juegosTop = await obtenerJuegosTop();
@@ -105,39 +115,58 @@ async function cargarTopJuegos() {
             contenedor.appendChild(crearCardJuego(juego));
         }
     } catch (err) {
+        console.error(err);
         contenedor.innerHTML = "<p style='color:red;'>Error al cargar top juegos.</p>";
     }
 }
 
 async function cargarSeccion(ids, selector) {
     const contenedor = document.querySelector(selector);
+    if (!contenedor) return;
+
     for (let id of ids) {
-        const info = await obtenerJuego(id);
-        contenedor.appendChild(crearCardJuego(info));
+        try {
+            const info = await obtenerJuego(id);
+            contenedor.appendChild(crearCardJuego(info));
+        } catch (error) {
+            console.error(`Error cargando juego ${id}`, error);
+        }
     }
 }
 
 async function cargarDetalle() {
+    // Solo ejecutamos esto si estamos en la página de detalle
+    const detalleDiv = document.getElementById("detalle");
+    if (!detalleDiv) return;
+
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
     if (!id) return;
 
-    const res = await fetch(`http://localhost:3000/api/game/${id}`);
-    const data = await res.json();
-    
-    const div = document.createElement("div");
-    div.classList.add("destacado-card");
-    document.getElementById("detalle").innerHTML = `
-        <h1>${data.name}</h1>
-        <img src="${data.header_image}" style="width:60%; border-radius:5px;">
-        <p style="display:block;">${data.short_description}</p>
-        <p><strong>Valoración:</strong> ${data.valoracion} (${data.porcentaje_positivo}%)</p>
-        <p><strong>Total de reseñas:</strong> ${data.total_reviews}</p>
-    `;
+    try {
+        // Usamos la variable API_URL aquí también
+        const res = await fetch(`${API_URL}/api/game/${id}`);
+        const data = await res.json();
+        
+        const div = document.createElement("div");
+        div.classList.add("destacado-card");
+        detalleDiv.innerHTML = `
+            <h1>${data.name}</h1>
+            <img src="${data.header_image}" style="width:60%; border-radius:5px;">
+            <p style="display:block;">${data.short_description}</p>
+            <p><strong>Valoración:</strong> ${data.valoracion} (${data.porcentaje_positivo}%)</p>
+            <p><strong>Total de reseñas:</strong> ${data.total_reviews}</p>
+        `;
+    } catch (error) {
+        console.error(error);
+        detalleDiv.innerHTML = "<p>Error cargando detalles.</p>";
+    }
 }
 
-// ====== EJECUCIÓN ======
-cargarDestacados();
-cargarTopJuegos();
-cargarSeccion(semanales, ".juegos_semanales");
-cargarDetalle();
+// ====== EJECUCIÓN SEGURA ======
+document.addEventListener("DOMContentLoaded", () => {
+    cargarDestacados();
+    cargarTopJuegos();
+    cargarSeccion(semanales, ".juegos_semanales");
+    cargarDetalle();
+});

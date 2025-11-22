@@ -3,48 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SteamStorm</title>
-    <link rel="icon" type="image/png" href="../Images/favicon.png">
+    <title>Crear Cuenta - SteamStorm</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../CSS/style_sesion.css">
-</head>
+    <link rel="stylesheet" href="../CSS/style_sesion.css"> 
+    </head>
 <body>
-
-    <div class="encabezado">
-        <img src="../Images/steamstorm_logo_alpha2.png" alt="" width="200,1" height="53,7">
-    </div>
-    <div class="sub_encabezado"></div>
-
     <div id="menu">
-    <ul>
-        <li class="fa-regular fa-window-maximize"><a href="inicio_guest.html"> | Inicio </a></li>
-        <li class="fa-regular fa-compass"><a href="../Guest/nosotros_guest.html"> | Sobre nosotros</a></li>
-        <li class="fa-regular fa-thumbs-up"><a href="../Guest/privacidad_guest.html"> | Politíca de privacidad</a></li>
-        <li class="fa-regular fa-comment"><a href="../Guest/soporte_guest.html"> | Soporte</a></li>
-    </ul>
+        <ul>
+            <li class="fa-regular fa-window-maximize"><a href="inicio_guest.html"> | Inicio </a></li>
+            </ul>
     </div>
-
-    <div id="menu-toggle"><i class="fas fa-list-ul" style="color: #D9D9D9;"></i></div> 
 
     <div class="letras_alta"><h3>CREAR CUENTA</h3></div>
-    <div class="juegos_destacados">
+    
+    <div class="juegos_destacados"> <label for="reg-usuario">Usuario</label>
+        <input type="text" id="reg-usuario" placeholder="Ingresa tu usuario">
 
-        <label for="">Usuario</label>
-        <input type="text" placeholder="">
-        <label for="">Contraseña</label>
-        <input type="password" placeholder="">
-        <label for="">Confirmar contraseña</label>
-        <input type="password" placeholder="">
+        <label for="reg-pass">Contraseña</label>
+        <input type="password" id="reg-pass" placeholder="Ingresa tu contraseña">
 
-        <button onclick="">Crear Cuenta</button>
+        <label for="reg-confirm">Confirmar contraseña</label>
+        <input type="password" id="reg-confirm" placeholder="Repite tu contraseña">
+
+        <button onclick="registrarUsuario()">Crear Cuenta</button>
 
         <div class="crear-cuenta-container">
             <p>¿Tienes cuenta? ¡Inicia sesión!</p>
             <button onclick="window.location.href='iniciosesion.html'">Iniciar Sesión</button>
         </div>
+    </div>
 
-    
-<script src="../Scripts/script_Menu.js"></script>   
+    <script src="../Scripts/script_Menu.js"></script>
+
+    <script>
+        async function registrarUsuario() {
+            const username = document.getElementById('reg-usuario').value;
+            const password = document.getElementById('reg-pass').value;
+            const confirm = document.getElementById('reg-confirm').value;
+
+            // 1. Validaciones básicas
+            if (!username || !password) {
+                alert("Por favor completa todos los campos.");
+                return;
+            }
+            if (password !== confirm) {
+                alert("Las contraseñas no coinciden.");
+                return;
+            }
+
+            try {
+                // 2. Petición al Backend en Render
+                const response = await fetch('https://steamstorm.onrender.com/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("¡Cuenta creada con éxito! Ahora inicia sesión.");
+                    window.location.href = 'iniciosesion.html';
+                } else {
+                    alert("Error: " + data.message);
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("Error al conectar con el servidor.");
+            }
+        }
+    </script>
 </body>
 </html>

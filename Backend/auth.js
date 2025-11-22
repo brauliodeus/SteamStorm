@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const pool = require('./db'); // Asegúrate de que db.js esté configurado para Postgres
+const pool = require('./db'); 
 
 // @route   POST /api/auth/register
 router.post('/register', async (req, res) => {
@@ -16,7 +16,7 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    // 1. Verificar si existe (Sintaxis Postgres: $1 en vez de ?)
+    // 1. Verifica si el usuario ya existe
     const userCheck = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     
     if (userCheck.rows.length > 0) {
@@ -57,7 +57,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Credenciales inválidas' });
     }
 
-    const user = result.rows[0]; // En Postgres los datos están en .rows
+    const user = result.rows[0];
 
     // 2. Comparar contraseña
     const isMatch = await bcrypt.compare(password, user.password);

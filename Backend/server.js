@@ -18,19 +18,16 @@ const PORT = process.env.PORT || 3000;
 // ==========================================
 // 2. MIDDLEWARES (Cables de conexión)
 // ==========================================
-app.use(cors());             // Permite que tu frontend (UCT) hable con este backend
-app.use(express.json());     // Permite leer los datos JSON que envían los formularios
+app.use(cors());             // app.use(express.json());     // 
 
 // ==========================================
 // 3. RUTAS DE SISTEMA (Login y Base de Datos)
 // ==========================================
 
 // A. Conectar las rutas de Autenticación (Login/Registro)
-// Esto habilita: /api/auth/register y /api/auth/login
 app.use('/api/auth', authRoutes);
 
 // B. RUTA DE UTILIDAD: CREAR TABLA USERS
-// Ejecuta esta ruta una vez desplegado para crear la tabla en Render
 app.get('/crear-tabla', async (req, res) => {
     try {
         await pool.query(`
