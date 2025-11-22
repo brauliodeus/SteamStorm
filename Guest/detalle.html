@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Juego | SteamStorm</title>
+
+    <link rel="stylesheet" href="../CSS/style_detalle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos base para asegurar que se vea bien */
+        body { background-color: #0b0c10; color: #c5c6c7; font-family: 'Open Sans', sans-serif; margin: 0; }
+        
+        /* Menú superior específico de Guest */
+        .guest-nav {
+            padding: 20px; 
+            background: #1f2833; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .detalle-container { max-width: 1000px; margin: 40px auto; padding: 20px; }
+        
+        /* Estilos para las reseñas y formulario */
+        .form-review { background: #1f2833; padding: 20px; border-radius: 10px; margin-top: 20px; border: 1px solid #45a29e; }
+        .review-card { background: #1e1e2e; margin: 10px 0; padding: 15px; border-radius: 8px; border-left: 4px solid #45a29e; }
+        
+        /* Elementos del formulario (aunque se ocultarán si no hay login) */
+        textarea, select { width: 100%; padding: 10px; margin: 10px 0; background: #0b0c10; color: white; border: 1px solid #45a29e; }
+        .btn-submit { background: #45a29e; color: #0b0c10; padding: 10px 20px; cursor: pointer; font-weight: bold; border: none; border-radius: 5px; }
+        
+        /* Enlaces */
+        a { text-decoration: none; color: inherit; }
+        a:hover { color: #66fcf1; }
+    </style>
+</head>
+<body>
+
+    <div class="guest-nav">
+        <img src="../Images/steamstorm_logo_alpha2.png" alt="Logo" width="150">
+        
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <a href="inicio_guest.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="iniciosesion.html" style="color:#66fcf1; border: 1px solid #66fcf1; padding: 5px 15px; border-radius: 20px;">Iniciar Sesión</a>
+        </div>
+    </div>
+
+    <div id="menu">
+        <ul>
+            <li class="fa-regular fa-window-maximize"><a href="inicio_guest.html"> | Inicio </a></li>
+            <li class="fa-regular fa-user"><a href="iniciosesion.html"> | Iniciar Sesión </a></li>
+            <li class="fa-regular fa-id-card"><a href="crearcuenta.html"> | Registrarse </a></li>
+            <li class="fa-regular fa-compass"><a href="nosotros_guest.html"> | Sobre nosotros</a></li>
+            <li class="fa-regular fa-comment"><a href="soporte_guest.html"> | Soporte</a></li>
+        </ul>
+    </div>
+    <div id="menu-toggle"><i class="fas fa-list-ul" style="color: #D9D9D9;"></i></div> 
+
+    <div class="detalle-container">
+        
+        <div id="detalle-juego-content">
+            <h2 style="text-align:center;">Cargando juego...</h2>
+        </div>
+
+        <div id="opiniones" style="margin-top:50px;">
+            <h2 style="color:#66fcf1; border-bottom: 1px solid #45a29e; padding-bottom: 10px;">
+                <i class="fas fa-comments"></i> Opiniones de la comunidad
+            </h2>
+            
+            <div class="form-review">
+                <h3>Deja tu opinión:</h3>
+                <select id="rating-input">
+                    <option value="100">⭐⭐⭐⭐⭐ (Excelente)</option>
+                    <option value="80">⭐⭐⭐⭐ (Muy bueno)</option>
+                    <option value="60">⭐⭐⭐ (Regular)</option>
+                    <option value="40">⭐⭐ (Malo)</option>
+                    <option value="20">⭐ (Terrible)</option>
+                </select>
+                <textarea id="comment-input" rows="3" placeholder="¿Qué te pareció este juego?"></textarea>
+                <button class="btn-submit" onclick="enviarReseña()">Publicar Reseña</button>
+            </div>
+
+            <div id="lista-opiniones"></div>
+        </div>
+    </div>
+
+    <script src="../Scripts/script_Menu.js"></script>
+    
+    <script src="../Scripts/script_detalle.js"></script>
+
+</body>
+</html>

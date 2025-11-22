@@ -1,4 +1,4 @@
-// ====== VARIABLES ======
+// ====== VARIABLES (Buscamos los elementos en el HTML) ======
 const menu = document.getElementById('menu');
 const menuToggle = document.getElementById('menu-toggle');
 const perfil = document.getElementById('perfil');
@@ -8,21 +8,41 @@ const soporte = document.getElementById('soporte');
 const privacidad = document.getElementById('privacidad');
 const cerrarsesion = document.getElementById('cerrarsesion');
 
-// ====== EVENTOS (SOLO SI EXISTEN) ======
+// ====== EVENTOS CON PROTECCIÓN (Solo se activan si el elemento existe) ======
 
+// 1. Botón Hamburguesa del Menú
 if (menu && menuToggle) {
     menuToggle.addEventListener('click', () => {
         menu.classList.toggle('active');
     });
 }
 
-if (perfil) perfil.addEventListener('click', () => console.log('Clic en Perfil'));
-if (inicio) inicio.addEventListener('click', () => console.log('Clic en Inicio'));
-if (privacidad) privacidad.addEventListener('click', () => console.log('Clic en Privacidad'));
-if (nosotros) nosotros.addEventListener('click', () => console.log('Clic en Nosotros'));
-if (soporte) soporte.addEventListener('click', () => console.log('Clic en Soporte'));
+// 2. Botón Perfil
+if (perfil) {
+    perfil.addEventListener('click', () => console.log('Clic en Perfil'));
+}
 
-// LOGOUT (Solo agregamos el evento si el botón existe en esta página)
+// 3. Botón Inicio
+if (inicio) {
+    inicio.addEventListener('click', () => console.log('Clic en Inicio'));
+}
+
+// 4. Botón Privacidad
+if (privacidad) {
+    privacidad.addEventListener('click', () => console.log('Clic en Privacidad'));
+}
+
+// 5. Botón Nosotros
+if (nosotros) {
+    nosotros.addEventListener('click', () => console.log('Clic en Nosotros'));
+}
+
+// 6. Botón Soporte
+if (soporte) {
+    soporte.addEventListener('click', () => console.log('Clic en Soporte'));
+}
+
+// 7. LOGOUT (Cerrar Sesión)
 if (cerrarsesion) {
     cerrarsesion.addEventListener('click', (e) => {
         e.preventDefault();

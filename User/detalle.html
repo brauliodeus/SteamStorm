@@ -5,51 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle del Juego | SteamStorm</title>
 
-    <script src="../Scripts/auth_guard.js"></script>
 
     <link rel="stylesheet" href="../CSS/style_detalle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
-        .form-review { background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        .form-review textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; background: #2a2a2a; color: white; border: 1px solid #444; }
-        .form-review select { padding: 10px; border-radius: 5px; background: #2a2a2a; color: white; border: none; }
-        .btn-submit { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-submit:hover { background: #0056b3; }
-        .review-card { background: #1e1e2e; margin: 10px 0; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff; }
+        /* Ajustes rápidos para que se vea bien */
+        body { background-color: #0b0c10; color: #c5c6c7; font-family: 'Open Sans', sans-serif; }
+        .detalle-container { max-width: 1000px; margin: 80px auto; padding: 20px; }
+        .form-review { background: #1f2833; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        textarea, select { width: 100%; padding: 10px; margin: 10px 0; background: #0b0c10; color: white; border: 1px solid #45a29e; }
+        .btn-submit { background: #45a29e; color: #0b0c10; padding: 10px 20px; cursor: pointer; font-weight: bold; border: none; }
     </style>
 </head>
 <body>
 
-    <div class="encabezado">
-        <img src="../Images/steamstorm_logo_alpha2.png" alt="Logo" width="200" height="53">
-    </div>
-    
-    <div class="sub_encabezado">
-        <a href="inicio_user.html" class="espaciado_letras_sub"> <i class="fas fa-arrow-left"></i> Volver al Inicio</a>
-    </div>
-
-    <div id="menu">
-        <ul>
-            <li class="fa-regular fa-user"><a href="perfil_user.html"> | Perfil</a></li>
-            <li class="fa-regular fa-compass"><a href="nosotros_user.html"> | Sobre nosotros</a></li>
-            <li class="fa-regular fa-thumbs-up"><a href="privacidad_user.html"> | Política de privacidad</a></li>
-            <li class="fa-regular fa-comment"><a href="soporte_user.html"> | Soporte</a></li>
-            <li class="fa-regular fa-rectangle-xmark"> <a href="#" id="cerrarsesion"> | Cerrar sesión</a></li>
-        </ul>
+    <div style="padding: 20px; background: #1f2833; display:flex; justify-content:space-between; align-items:center;">
+        <img src="../Images/steamstorm_logo_alpha2.png" alt="Logo" width="150">
+        <a href="inicio_user.html" style="color:#66fcf1; text-decoration:none; font-weight:bold;">
+            <i class="fas fa-arrow-left"></i> Volver al Inicio
+        </a>
     </div>
 
-    <div id="menu-toggle"><i class="fas fa-list-ul" style="color: #D9D9D9;"></i></div> 
-
-    <div class="detalle-container" style="margin-top: 20px; padding: 20px; color: white;">
+    <div class="detalle-container">
         
         <div id="detalle-juego-content">
-            <h2 style="text-align:center;">Cargando información...</h2>
+            <h2 style="text-align:center;">Cargando información del juego...</h2>
         </div>
 
         <div id="opiniones" style="margin-top:50px;">
-            <h2><i class="fas fa-comments"></i> Opiniones de la comunidad</h2>
+            <h2 style="color:#66fcf1;">Opiniones de la comunidad</h2>
             
             <div class="form-review">
                 <h3>Deja tu opinión:</h3>
@@ -69,6 +55,7 @@
     </div>
 
     <script src="../Scripts/script_Menu.js"></script>
+    
     <script src="../Scripts/script_detalle.js"></script>
 </body>
 </html>
