@@ -1,6 +1,6 @@
 const BACKUP_GAMES = [
     // ======================================================
-    // SECCIÓN 1: DESTACADOS (Los 4 primeros aparecen arriba)
+    // SECCIÓN 1: DESTACADOS
     // ======================================================
     { 
         appid: 413150, 
@@ -32,7 +32,7 @@ const BACKUP_GAMES = [
     },
 
     // ======================================================
-    // SECCIÓN 2: TOP JUEGOS (El resto de la lista)
+    // SECCIÓN 2: TOP JUEGOS
     // ======================================================
     { 
         appid: 1086940, 

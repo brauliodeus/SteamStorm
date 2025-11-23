@@ -31,7 +31,7 @@ const STEAM_HEADERS = {
 app.use('/api/auth', authRoutes);
 
 // RUTA MAESTRA PARA CREAR/VERIFICAR TODAS LAS TABLAS
-// Visita: https://tu-app.onrender.com/crear-tablas-general
+// Visitar: https://steamstorm.onrender.com/crear-tablas-general
 app.get('/crear-tablas-general', async (req, res) => {
     try {
         // 1. Tabla Usuarios
@@ -71,7 +71,7 @@ app.get('/crear-tablas-general', async (req, res) => {
 });
 
 // ==========================================
-// 4. RUTAS DE WISHLIST (ESTAS FALTABAN)
+// 4. RUTAS DE WISHLIST
 // ==========================================
 
 // Agregar a favoritos
@@ -98,7 +98,7 @@ app.delete('/api/wishlist/remove', async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// Verificar si ya está guardado (Para pintar el corazón)
+// Verificar si ya está guardado
 app.get('/api/wishlist/check/:username/:game_id', async (req, res) => {
     const { username, game_id } = req.params;
     try {
@@ -123,7 +123,7 @@ app.get('/api/wishlist/getall/:username', async (req, res) => {
 });
 
 // ==========================================
-// 5. RUTAS DE RESEÑAS (ESTAS TAMBIÉN)
+// 5. RUTAS DE RESEÑAS
 // ==========================================
 app.post('/api/reviews', async (req, res) => {
     const { game_id, username, comment, rating } = req.body;

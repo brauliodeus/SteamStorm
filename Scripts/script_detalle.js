@@ -6,7 +6,7 @@ const gameId = params.get("id");
 const token = localStorage.getItem('token');
 const username = localStorage.getItem('username') || "Anónimo";
 
-// 2. VARIABLE GLOBAL IMPORTANTE (Si faltaba esta, todo fallaba)
+// 2. VARIABLE GLOBAL IMPORTANTE
 let currentGameData = null;
 
 // 3. FUNCIÓN PRINCIPAL: CARGAR DETALLE
@@ -21,7 +21,7 @@ async function cargarDetalle() {
     // A. Intentamos buscar en el archivo de respaldo local (Instantáneo)
     let data = null;
     
-    // Verificamos si el archivo de respaldo se cargó correctamente
+    // Se verifica si el archivo de respaldo se cargó correctamente
     if (typeof buscarEnBackup === 'function') {
         data = buscarEnBackup(gameId);
     } else {
@@ -29,8 +29,8 @@ async function cargarDetalle() {
     }
 
     if (data) {
-        // ¡Juego encontrado en local! Lo mostramos
-        currentGameData = data; // Guardamos para usarlo en el botón de deseos
+        // Juego encontrado en local
+        currentGameData = data; 
 
         contenedor.innerHTML = `
             <div style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center; align-items:flex-start;">
@@ -59,7 +59,7 @@ async function cargarDetalle() {
         contenedor.innerHTML = "<h2>⚠ Información del juego no disponible.</h2>";
     }
 
-    // B. Cargamos las reseñas SIEMPRE (estén o no los datos del juego)
+    // B. Cargamos las reseñas (estén o no los datos del juego)
     cargarReseñas();
 }
 

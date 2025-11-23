@@ -36,7 +36,6 @@ function crearCard(info, esDestacado = false) {
     // Usamos "juego-card" para todos para que se vean uniformes en el grid
     div.classList.add("juego-card");
     
-    // Si es destacado, le podemos dar un borde diferente o título de color (opcional)
     const colorTitulo = esDestacado ? "#66fcf1" : "white";
 
     div.innerHTML = `
@@ -55,25 +54,25 @@ function crearCard(info, esDestacado = false) {
 
 // ====== 3. CARGAR TODO EN PANTALLA ======
 async function cargarTodo() {
-    // Pedimos la lista gigante (Server o Backup)
+    // Pedimos la lista gigante (sv.js o backup)
     const juegosTop = await obtenerJuegosTop() || [];
     
     // A. SECCIÓN DESTACADOS (Los primeros 4 juegos)
     const contDestacados = document.querySelector(".juegos_destacados");
     if (contDestacados) {
         contDestacados.innerHTML = "";
-        // Tomamos del 0 al 4
+        // Toma del 0 al 4
         juegosTop.slice(0, 4).forEach(j => {
             // True indica que es destacado (titulo celeste)
             contDestacados.appendChild(crearCard(j, true));
         });
     }
     
-    // B. SECCIÓN TOP JUEGOS (El resto)
+    // B. SECCIÓN TOP JUEGOS
     const contTop = document.querySelector(".juegos_top");
     if (contTop) {
         contTop.innerHTML = "";
-        // Tomamos del 4 en adelante
+
         juegosTop.slice(4).forEach(j => {
             contTop.appendChild(crearCard(j, false));
         });

@@ -12,7 +12,7 @@ async function cargarWishlist() {
     if (!username) return contenedor.innerHTML = "<p style='color:white; text-align:center;'>Inicia sesión para ver tu lista.</p>";
 
     try {
-        // Pedimos la lista básica
+        // Pide la lista básica (algo rápido) de juegos en la wishlist
         const res = await fetch(`${API_URL}/api/wishlist/getall/${username}`);
         const listaBasica = await res.json();
 
@@ -21,10 +21,10 @@ async function cargarWishlist() {
             return;
         }
 
-        // Preparamos la lista completa enriqueciendo los datos
+        // Preparamos la lista completa mostrando los datos
         allMyGames = []; // Limpiamos
 
-        // Iteramos para obtener detalles frescos (etiquetas, score) de cada juego
+        // Iteramos para obtener detalles frescos (etiquetas, puntuacion) de cada juego
         for (const item of listaBasica) {
             let detalles = { 
                 name: item.game_name, 
@@ -48,14 +48,13 @@ async function cargarWishlist() {
                 }
             } catch (e) { console.log("Usando datos cacheados"); }
 
-            // Guardamos el objeto completo en memoria
+            // Guarda el objeto completo en memoria
             allMyGames.push({
                 ...item, // id, added_at
                 details: detalles // info fresca
             });
         }
 
-        // Renderizamos por primera vez
         renderGames(allMyGames);
 
     } catch (error) {
@@ -140,7 +139,7 @@ function filtrarYOrdenar() {
         }
     });
 
-    // 3. Volver a dibujar
+
     renderGames(resultados);
 }
 
@@ -159,7 +158,7 @@ async function eliminarJuego(id) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, game_id: id })
         });
-        // Recargamos todo para refrescar la lista global
+        // Se recarga todo para refrescar la lista global
         cargarWishlist();
     } catch (e) { alert("Error al eliminar"); }
 }
