@@ -1,67 +1,168 @@
-// ====== CONFIGURACIÓN ======
 const API_URL = "https://steamstorm.onrender.com"; 
 const username = localStorage.getItem('username');
 
-// ====== FUNCIÓN PRINCIPAL: CARGAR LISTA ======
+// Variables globales para manejar el filtrado instantáneo
+let allMyGames = []; 
+
+if(username) document.getElementById('user-title').innerText = `LISTA DE DESEADOS DE ${username.toUpperCase()}`;
+
+// ====== 1. CARGA INICIAL ======
 async function cargarWishlist() {
     const contenedor = document.getElementById("wishlist-grid");
-    
-    // Validación de seguridad extra
-    if (!username) {
-        contenedor.innerHTML = "<p class='empty-message'>Error: No se pudo identificar al usuario.</p>";
-        return;
-    }
+    if (!username) return contenedor.innerHTML = "<p style='color:white; text-align:center;'>Inicia sesión para ver tu lista.</p>";
 
     try {
-        // 1. Pedir la lista al servidor
+        // Pedimos la lista básica
         const res = await fetch(`${API_URL}/api/wishlist/getall/${username}`);
-        
-        if (!res.ok) throw new Error("Error al conectar con el servidor");
-        
-        const listaJuegos = await res.json();
+        const listaBasica = await res.json();
 
-        // 2. Limpiar contenedor
-        contenedor.innerHTML = "";
-
-        // 3. Verificar si está vacía
-        if (listaJuegos.length === 0) {
-            contenedor.innerHTML = `
-                <div class="empty-message">
-                    <i class="far fa-frown-open" style="font-size: 3rem; margin-bottom: 20px; display:block;"></i>
-                    Tu lista de deseados está vacía.<br>
-                    ¡Ve al inicio y agrega algunos juegos!
-                </div>`;
+        if (listaBasica.length === 0) {
+            contenedor.innerHTML = "<p style='color:#888; text-align:center; padding:40px;'>Tu lista está vacía. ¡Agrega juegos desde la tienda!</p>";
             return;
         }
 
-        // 4. Pintar los juegos (Crear tarjetas)
-        listaJuegos.forEach(juego => {
-            const card = document.createElement("div");
-            card.classList.add("juego-card"); // Reusamos tu estilo de tarjeta
-            
-            // Usamos los datos guardados en la base de datos (nombre e imagen)
-            card.innerHTML = `
-                <img src="${juego.game_image}" alt="${juego.game_name}" class="juego-img">
-                <h4>${juego.game_name}</h4>
-                <p style="color:#ff4d4d; font-size:0.9rem; margin-bottom:15px;">
-                    <i class="fas fa-heart"></i> Guardado
-                </p>
-            `;
-            
-            // Al hacer clic, vamos al detalle de ese juego
-            card.style.cursor = "pointer";
-            card.addEventListener("click", () => {
-                window.location.href = `detalle.html?id=${juego.game_id}`;
-            });
+        // Preparamos la lista completa enriqueciendo los datos
+        allMyGames = []; // Limpiamos
 
-            contenedor.appendChild(card);
-        });
+        // Iteramos para obtener detalles frescos (etiquetas, score) de cada juego
+        for (const item of listaBasica) {
+            let detalles = { 
+                name: item.game_name, 
+                header_image: item.game_image,
+                valoracion: "Sin información",
+                porcentaje: 0, // Necesario para ordenar
+                genres: ["Juego"]
+            };
+
+            try {
+                const gameRes = await fetch(`${API_URL}/api/game/${item.game_id}`);
+                if(gameRes.ok) {
+                    const data = await gameRes.json();
+                    detalles = {
+                        name: data.name,
+                        header_image: data.header_image,
+                        valoracion: data.valoracion,
+                        porcentaje: data.porcentaje_positivo,
+                        genres: data.genres || []
+                    };
+                }
+            } catch (e) { console.log("Usando datos cacheados"); }
+
+            // Guardamos el objeto completo en memoria
+            allMyGames.push({
+                ...item, // id, added_at
+                details: detalles // info fresca
+            });
+        }
+
+        // Renderizamos por primera vez
+        renderGames(allMyGames);
 
     } catch (error) {
-        console.error("Error cargando wishlist:", error);
-        contenedor.innerHTML = `<p class='empty-message'>❌ Hubo un problema al cargar tu lista. Intenta recargar la página.</p>`;
+        console.error(error);
+        contenedor.innerHTML = "<p style='color:red; text-align:center;'>Error cargando lista.</p>";
     }
 }
 
-// ====== INICIAR AL CARGAR LA PÁGINA ======
+// ====== 2. FUNCIÓN DE DIBUJADO (RENDER) ======
+function renderGames(listaJuegos) {
+    const contenedor = document.getElementById("wishlist-grid");
+    contenedor.innerHTML = ""; // Limpiar contenedor
+
+    if (listaJuegos.length === 0) {
+        contenedor.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>No se encontraron juegos.</p>";
+        return;
+    }
+
+    listaJuegos.forEach(item => {
+        const fechaAgregado = new Date(item.added_at).toLocaleDateString();
+        
+        const row = document.createElement("div");
+        row.classList.add("wishlist-row");
+        
+        row.innerHTML = `
+            <img src="${item.details.header_image}" onclick="irDetalle('${item.game_id}')">
+            
+            <div class="wishlist-info">
+                <h3 class="game-title" onclick="irDetalle('${item.game_id}')">${item.details.name}</h3>
+                
+                <div class="game-stats">
+                    <div style="margin-bottom:5px;">
+                        RESEÑAS GENERALES: <span class="review-tag">${item.details.valoracion}</span>
+                    </div>
+                    <div style="margin-bottom:5px;">
+                        FECHA LANZAMIENTO: <span style="color:#b0aeac;">Desconocida</span>
+                    </div>
+                    <div class="platform-icons">
+                        <i class="fab fa-windows"></i> <i class="fab fa-steam"></i>
+                    </div>
+                    <div style="margin-top:10px; color: #56707f;">
+                        Etiquetas: ${item.details.genres.slice(0,3).join(", ")}
+                    </div>
+                </div>
+            </div>
+
+            <div class="wishlist-action">
+                <div style="color:white; font-size:13px;">Disponible</div> 
+                
+                <div style="margin-top:15px; text-align:right;">
+                    <div class="date-added">Añadido el ${fechaAgregado}</div>
+                    <div class="remove-link" onclick="eliminarJuego('${item.game_id}')">( eliminar )</div>
+                </div>
+            </div>
+        `;
+        contenedor.appendChild(row);
+    });
+}
+
+// ====== 3. LÓGICA DE FILTRADO Y ORDEN ======
+function filtrarYOrdenar() {
+    const textoBusqueda = document.getElementById('search-input').value.toLowerCase();
+    const criterioOrden = document.getElementById('sort-select').value;
+
+    // 1. Filtrar
+    let resultados = allMyGames.filter(item => {
+        const nombre = item.details.name.toLowerCase();
+        const etiquetas = item.details.genres.join(" ").toLowerCase();
+        return nombre.includes(textoBusqueda) || etiquetas.includes(textoBusqueda);
+    });
+
+    // 2. Ordenar
+    resultados.sort((a, b) => {
+        if (criterioOrden === 'name') {
+            return a.details.name.localeCompare(b.details.name);
+        } else if (criterioOrden === 'date-new') {
+            return new Date(b.added_at) - new Date(a.added_at);
+        } else if (criterioOrden === 'date-old') {
+            return new Date(a.added_at) - new Date(b.added_at);
+        } else if (criterioOrden === 'review') {
+            return b.details.porcentaje - a.details.porcentaje;
+        }
+    });
+
+    // 3. Volver a dibujar
+    renderGames(resultados);
+}
+
+// ====== 4. LISTENERS DE EVENTOS ======
+document.getElementById('search-input').addEventListener('input', filtrarYOrdenar);
+document.getElementById('sort-select').addEventListener('change', filtrarYOrdenar);
+
+// Funciones auxiliares
+function irDetalle(id) { window.location.href = `detalle.html?id=${id}`; }
+
+async function eliminarJuego(id) {
+    if(!confirm("¿Eliminar de la lista?")) return;
+    try {
+        await fetch(`${API_URL}/api/wishlist/remove`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, game_id: id })
+        });
+        // Recargamos todo para refrescar la lista global
+        cargarWishlist();
+    } catch (e) { alert("Error al eliminar"); }
+}
+
+// Iniciar
 document.addEventListener("DOMContentLoaded", cargarWishlist);

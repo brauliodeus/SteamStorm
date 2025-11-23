@@ -1,0 +1,32 @@
+const BACKUP_GAMES = [
+    // --- NUEVOS AÑADIDOS ---
+    { appid: 413150, name: "Stardew Valley", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg", short_description: "La vida en la granja te espera.", valoracion: "Overwhelmingly Positive", porcentaje_positivo: 98, genres: ["RPG", "Simulación"] },
+    { appid: 105600, name: "Terraria", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg", short_description: "Cava, lucha, explora, construye.", valoracion: "Overwhelmingly Positive", porcentaje_positivo: 97, genres: ["Aventura", "Indie"] },
+    { appid: 883710, name: "Resident Evil 2", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/883710/header.jpg", short_description: "El regreso de un clásico del terror.", valoracion: "Overwhelmingly Positive", porcentaje_positivo: 97, genres: ["Terror", "Acción"] },
+    { appid: 582010, name: "Monster Hunter: World", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/582010/header.jpg", short_description: "¡Bienvenidos al Nuevo Mundo!", valoracion: "Very Positive", porcentaje_positivo: 87, genres: ["Acción", "RPG"] },
+    { appid: 374320, name: "Dark Souls III", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/374320/header.jpg", short_description: "Solo quedan ascuas...", valoracion: "Very Positive", porcentaje_positivo: 94, genres: ["RPG", "Difícil"] },
+    { appid: 1687950, name: "Persona 5 Royal", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/header.jpg", short_description: "Ponte la máscara.", valoracion: "Overwhelmingly Positive", porcentaje_positivo: 97, genres: ["JRPG", "Anime"] },
+    { appid: 1817070, name: "Marvel’s Spider-Man Remastered", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1817070/header.jpg", short_description: "Sé mejor. Sé Spider-Man.", valoracion: "Overwhelmingly Positive", porcentaje_positivo: 96, genres: ["Acción", "Mundo Abierto"] },
+    { appid: 1172470, name: "Apex Legends", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1172470/header.jpg", short_description: "Domina con estilo en este Battle Royale.", valoracion: "Mostly Positive", porcentaje_positivo: 78, genres: ["FPS", "Gratis"] },
+    { appid: 252490, name: "Rust", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/252490/header.jpg", short_description: "Sobrevive a toda costa.", valoracion: "Very Positive", porcentaje_positivo: 87, genres: ["Survival", "Multijugador"] },
+    { appid: 945360, name: "Among Us", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/945360/header.jpg", short_description: "Traición en el espacio.", valoracion: "Very Positive", porcentaje_positivo: 92, genres: ["Casual", "Social"] },
+
+    // --- CLÁSICOS ---
+    { appid: 1086940, name: "Baldur's Gate 3", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg", short_description: "Reúne a tu grupo.", valoracion: "Overwhelmingly Positive", porcentaje_positivo: 96, genres: ["RPG", "Estrategia"] },
+    { appid: 1245620, name: "Elden Ring", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg", short_description: "Levántate, tiznado.", valoracion: "Very Positive", porcentaje_positivo: 92, genres: ["RPG", "Souls-like"] },
+    { appid: 1174180, name: "Red Dead Redemption 2", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg", short_description: "Forajidos de por vida.", valoracion: "Very Positive", porcentaje_positivo: 91, genres: ["Aventura", "Oeste"] },
+    { appid: 292030, name: "The Witcher 3", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg", short_description: "La espada del destino.", valoracion: "Overwhelmingly Positive", porcentaje_positivo: 96, genres: ["RPG", "Fantasía"] },
+    { appid: 1593500, name: "God of War", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg", short_description: "Kratos regresa.", valoracion: "Overwhelmingly Positive", porcentaje_positivo: 96, genres: ["Acción", "Mitología"] },
+    { appid: 1091500, name: "Cyberpunk 2077", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg", short_description: "Quema la ciudad.", valoracion: "Very Positive", porcentaje_positivo: 88, genres: ["RPG", "Futuro"] },
+    { appid: 271590, name: "Grand Theft Auto V", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg", short_description: "Bienvenido a Los Santos.", valoracion: "Very Positive", porcentaje_positivo: 87, genres: ["Acción", "Mundo Abierto"] },
+    { appid: 1145360, name: "Hades", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145360/header.jpg", short_description: "Escapa del infierno.", valoracion: "Overwhelmingly Positive", porcentaje_positivo: 98, genres: ["Roguelike", "Acción"] },
+    { appid: 550, name: "Left 4 Dead 2", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/550/header.jpg", short_description: "Zombis y amigos.", valoracion: "Overwhelmingly Positive", porcentaje_positivo: 97, genres: ["Shooter", "Co-op"] },
+    { appid: 730, name: "Counter-Strike 2", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/730/header.jpg", short_description: "El FPS definitivo.", valoracion: "Very Positive", porcentaje_positivo: 88, genres: ["FPS", "Competitivo"] },
+    { appid: 570, name: "Dota 2", header_image: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570/header.jpg", short_description: "La batalla de los ancestros.", valoracion: "Very Positive", porcentaje_positivo: 82, genres: ["MOBA", "Estrategia"] }
+];
+
+// Función de búsqueda robusta (convierte ID a número para comparar)
+function buscarEnBackup(id) {
+    if (!id) return BACKUP_GAMES;
+    return BACKUP_GAMES.find(g => g.appid == id);
+}

@@ -10,37 +10,29 @@
     <link rel="icon" type="image/png" href="../Images/favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="../CSS/style_inicio.css">
 </head>
 <body>
     
     <div class="encabezado">
-        <img src="../Images/steamstorm_logo_alpha2.png" alt="" width="200,1" height="53,7">
+        <img src="../Images/steamstorm_logo_alpha2.png" alt="Logo" width="200" height="54">
     </div>
+    
     <div class="sub_encabezado">
         <a href="#destacados">Juegos destacados</a>
         <a href="#top" class="espaciado_letras_sub">Top juegos</a> 
-        <a href="#semanales" class="espaciado_letras_sub">Raking juegos</a>
+        <a href="#semanales" class="espaciado_letras_sub">Ranking juegos</a>
     </div>
 
     <div id="menu">
     <ul>
-        <!--<li></li>-->
         <li class="fa-regular fa-user"><a href="perfil_user.html"> | Perfil</a></li>
         <li class="fa-regular fa-heart"><a href="wishlist.html"> | Lista de Deseados </a></li>
         <li class="fa-regular fa-compass"><a href="nosotros_user.html"> | Sobre nosotros</a></li>
-        <li class="fa-regular fa-thumbs-up"><a href="privacidad_user.html"> | Politíca de privacidad</a></li>
+        <li class="fa-regular fa-thumbs-up"><a href="privacidad_user.html"> | Política de privacidad</a></li>
         <li class="fa-regular fa-comment"><a href="soporte_user.html"> | Soporte</a></li>
-        <!--<li> <a>Eliminar cuenta</a></li>-->
-
-        <li class="fa-regular fa-rectangle-xmark"> <a href="../Guest/inicio_guest.html"> | Cerrar sesion</a></li>
-
-        <!--
-        <i class="fa-regular fa-rectangle-xmark">Categorias | Juegos populares| Mejor puntuados</i>
-        <li class="fa-regular fa-square-caret-down"></li>
-        <i class="fa-regular fa-comment"></i>
-        <li class="fa-regular fa-comments"><a> | Soporte</a></li>
-        -->
+        <li class="fa-regular fa-rectangle-xmark"> <a href="#" id="cerrarsesion"> | Cerrar sesión</a></li>
     </ul>
     </div>
 
@@ -49,17 +41,17 @@
     <div class="letras_alta"><h3 id="destacados">JUEGOS DESTACADOS</h3></div>
     <div class="juegos_destacados"></div>
 
-    <div class="letras_topjuegos"><h3 id = "top">TOP JUEGOS</h3></div>
+    <div class="letras_topjuegos"><h3 id="top">TOP JUEGOS</h3></div>
     <div class="juegos_top"></div>
 
-
-    <div class="letras_juegossemanales"><h3 id = "semanales">RANKING JUEGOS</h3></div>
+    <div class="letras_juegossemanales"><h3 id="semanales">RANKING JUEGOS</h3></div>
     <div class="juegos_semanales"></div>
 
-    <div></div>
+    <script src="../Scripts/script_Menu.js"></script>
+    
+    <script src="../Scripts/datos_backup.js"></script>
+    
+    <script src="../Scripts/steamgames.js"></script>
 
-
-<script src="../Scripts/script_Menu.js"></script>
-<script src="../Scripts/steamgames.js"></script>
 </body>
 </html>

@@ -4,7 +4,9 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const pool = require('./db'); 
 
-// @route   POST /api/auth/register
+// ==========================================
+// 1. REGISTRO DE USUARIO
+// ==========================================
 router.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
@@ -16,18 +18,18 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    // 1. Verifica si el usuario ya existe
+    // Verificar si existe
     const userCheck = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     
     if (userCheck.rows.length > 0) {
       return res.status(400).json({ message: 'El usuario ya existe' });
     }
 
-    // 2. Encriptar contraseña
+    // Encriptar
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 3. Insertar usuario (Sintaxis Postgres: $1, $2)
+    // Guardar
     await pool.query(
         'INSERT INTO users (username, password) VALUES ($1, $2)', 
         [username, hashedPassword]
@@ -41,7 +43,9 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/login
+// ==========================================
+// 2. INICIAR SESIÓN (LOGIN)
+// ==========================================
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -50,7 +54,7 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    // 1. Buscar usuario
+    // Buscar usuario
     const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     
     if (result.rows.length === 0) {
@@ -59,13 +63,13 @@ router.post('/login', async (req, res) => {
 
     const user = result.rows[0];
 
-    // 2. Comparar contraseña
+    // Verificar contraseña
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Credenciales inválidas' });
     }
 
-    // 3. Generar Token
+    // Generar Token (30 min)
     const payload = { user: { id: user.id } };
     
     jwt.sign(
@@ -85,6 +89,52 @@ router.post('/login', async (req, res) => {
     console.error(err);
     res.status(500).json({ message: 'Error en el servidor' });
   }
+});
+
+// ==========================================
+// 3. CAMBIAR CONTRASEÑA (NUEVO)
+// ==========================================
+router.post('/change-password', async (req, res) => {
+    const { username, oldPassword, newPassword } = req.body;
+
+    // Validaciones básicas
+    if (!username || !oldPassword || !newPassword) {
+        return res.status(400).json({ message: 'Por favor rellena todos los campos.' });
+    }
+
+    if (newPassword.length < 6) {
+        return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 6 caracteres.' });
+    }
+
+    try {
+        // 1. Buscar al usuario
+        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        const user = result.rows[0];
+
+        // 2. Verificar que la contraseña VIEJA sea correcta
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'La contraseña actual es incorrecta.' });
+        }
+
+        // 3. Encriptar la NUEVA contraseña
+        const salt = await bcrypt.genSalt(10);
+        const newHashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // 4. Actualizar en la Base de Datos
+        await pool.query('UPDATE users SET password = $1 WHERE username = $2', [newHashedPassword, username]);
+
+        res.json({ message: '¡Contraseña actualizada con éxito!' });
+
+    } catch (err) {
+        console.error("Error cambiando password:", err);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
 });
 
 module.exports = router;

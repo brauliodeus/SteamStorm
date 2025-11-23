@@ -1,0 +1,5 @@
+# Archivos de entorno (Secretos)
+.env
+
+# Librerías pesadas (Se instalan solas en el servidor)
+node_modules/

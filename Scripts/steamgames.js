@@ -1,125 +1,93 @@
-// ====== CONFIGURACIÓN ======
 const API_URL = "https://steamstorm.onrender.com"; 
-
 const semanales = [292030, 1174180, 945360]; 
 
-// ====== FUNCIONES DE PETICIÓN (FETCH) ======
-async function obtenerJuego(appid) {
-    const res = await fetch(`${API_URL}/api/game/${appid}`);
-    return await res.json();
-}
-
-async function obtenerJuegosTop() {
-    const res = await fetch(`${API_URL}/api/top-games`);
-    return await res.json();
-}
-
-// Función de estrellas
-function generarEstrellas(valoracion) {
-    const mapping = {
-        "Overwhelmingly Positive": 100, "Very Positive": 90, "Positive": 80,
-        "Mostly Positive": 70, "Mixed": 50, "Mostly Negative": 30,
-        "Negative": 20, "Very Negative": 10, "Overwhelmingly Negative": 0
-    };
-    const porcentaje = typeof valoracion === "string" ? (mapping[valoracion] || 50) : valoracion;
-    const estrellasLlenas = Math.round(porcentaje / 20);
-    let estrellasHTML = "";
-    for (let i = 1; i <= 5; i++) {
-        estrellasHTML += `<i class="fa${i <= estrellasLlenas ? "s" : "r"} fa-star" style="color: gold;"></i>`;
+// ====== 1. FUNCIÓN DE DATOS (HÍBRIDA: SERVER + BACKUP) ======
+async function fetchData(endpoint, backupId = null) {
+    try {
+        // Intentamos servidor
+        const res = await fetch(`${API_URL}${endpoint}`);
+        if (!res.ok) throw new Error("Server Error");
+        const data = await res.json();
+        if (Array.isArray(data) && data.length === 0) throw new Error("Lista vacía");
+        return data;
+    } catch (error) {
+        // Si falla, usamos respaldo local
+        if (typeof buscarEnBackup === 'function') return buscarEnBackup(backupId);
+        return null;
     }
-    return `${estrellasHTML} <span style="color:#D9D9D9;">(${porcentaje}%)</span>`;
 }
 
-// Crear Tarjetas
-function crearCardJuego(info) {
+async function obtenerJuego(appid) { return await fetchData(`/api/game/${appid}`, appid); }
+async function obtenerJuegosTop() { return await fetchData(`/api/top-games`); }
+
+// ====== 2. CREAR TARJETAS VISUALES ======
+function generarEstrellas(porcentaje) {
+    const score = Math.max(0, Math.min(100, parseInt(porcentaje) || 0));
+    const estrellasLlenas = Math.round(score / 20);
+    let html = "";
+    for (let i = 1; i <= 5; i++) html += `<i class="${i <= estrellasLlenas ? "fas" : "far"} fa-star" style="color: gold;"></i>`;
+    return `${html} <span style="color:#D9D9D9; font-size:0.9em;">(${score}%)</span>`;
+}
+
+function crearCard(info, esDestacado = false) {
+    if (!info) return document.createElement('div');
+
     const div = document.createElement("div");
+    // Usamos "juego-card" para todos para que se vean uniformes en el grid
     div.classList.add("juego-card");
+    
+    // Si es destacado, le podemos dar un borde diferente o título de color (opcional)
+    const colorTitulo = esDestacado ? "#66fcf1" : "white";
+
     div.innerHTML = `
         <img src="${info.header_image}" alt="${info.name}" class="juego-img">
-        <h4>${info.name}</h4>
-        <p><strong>Género:</strong> ${info.genres ? info.genres.join(", ") : "Varios"}</p>
-        <p><strong>Valoración:</strong> ${generarEstrellas(info.porcentaje_positivo)}</p>
-    `;
-    div.addEventListener("click", () => {
-        window.location.href = `detalle.html?id=${info.appid}`;
-    });
-    return div;
-}
-
-function crearCardDestacado(info) {
-    const div = document.createElement("div");
-    div.classList.add("destacado-card");
-    div.innerHTML = `
-        <img src="${info.header_image}" alt="${info.name}">
-        <div class="info">
-            <h3>${info.name}</h3>
-            <p>${info.short_description}</p>
-            <p><strong>Valoración:</strong> ${generarEstrellas(info.porcentaje_positivo)}</p>
+        <div class="info" style="padding:10px;">
+            <h4 style="margin:10px 0; color:${colorTitulo};">${info.name}</h4>
+            <p style="font-size:0.9em; color:#aaa;">${info.genres ? info.genres[0] : "Juego"}</p>
+            <p>${generarEstrellas(info.porcentaje_positivo)}</p>
         </div>
     `;
+    
+    const targetUrl = window.location.pathname.includes("/User/") ? `detalle.html?id=${info.appid}` : `../Guest/detalle.html?id=${info.appid}`;
+    div.addEventListener("click", () => window.location.href = targetUrl);
     return div;
 }
 
-// Cargar Secciones
-async function cargarDestacados() {
-    const contenedor = document.querySelector(".juegos_destacados");
-    if(!contenedor) return;
-    contenedor.innerHTML = "<p style='text-align:center'>Cargando servidor...</p>";
+// ====== 3. CARGAR TODO EN PANTALLA ======
+async function cargarTodo() {
+    // Pedimos la lista gigante (Server o Backup)
+    const juegosTop = await obtenerJuegosTop() || [];
     
-    try {
-        const juegosTop = await obtenerJuegosTop();
-        const top3 = juegosTop.slice(0, 3);
-        contenedor.innerHTML = "";
-        const juegos = [];
-
-        for (const juego of top3) {
-            const card = crearCardDestacado(juego);
-            contenedor.appendChild(card);
-            juegos.push(card);
-        }
-
-        if (juegos.length > 0) {
-            let index = 0;
-            juegos[index].classList.add("activo");
-            setInterval(() => {
-                juegos[index].classList.remove("activo");
-                index = (index + 1) % juegos.length;
-                juegos[index].classList.add("activo");
-            }, 5000);
-        }
-    } catch (err) {
-        contenedor.innerHTML = "<p style='color:red; text-align:center'>Error cargando juegos.</p>";
+    // A. SECCIÓN DESTACADOS (Los primeros 4 juegos)
+    const contDestacados = document.querySelector(".juegos_destacados");
+    if (contDestacados) {
+        contDestacados.innerHTML = "";
+        // Tomamos del 0 al 4
+        juegosTop.slice(0, 4).forEach(j => {
+            // True indica que es destacado (titulo celeste)
+            contDestacados.appendChild(crearCard(j, true));
+        });
     }
-}
-
-async function cargarTopJuegos() {
-    const contenedor = document.querySelector(".juegos_top");
-    if(!contenedor) return;
-    try {
-        const juegosTop = await obtenerJuegosTop();
-        contenedor.innerHTML = "";
-        for (const juego of juegosTop) {
-            contenedor.appendChild(crearCardJuego(juego));
-        }
-    } catch (err) {
-        console.error(err);
+    
+    // B. SECCIÓN TOP JUEGOS (El resto)
+    const contTop = document.querySelector(".juegos_top");
+    if (contTop) {
+        contTop.innerHTML = "";
+        // Tomamos del 4 en adelante
+        juegosTop.slice(4).forEach(j => {
+            contTop.appendChild(crearCard(j, false));
+        });
     }
-}
 
-async function cargarSeccion(ids, selector) {
-    const contenedor = document.querySelector(selector);
-    if(!contenedor) return;
-    for (let id of ids) {
-        try {
+    // C. SECCIÓN SEMANALES (Manuales)
+    const contSemanales = document.querySelector(".juegos_semanales");
+    if (contSemanales) {
+        contSemanales.innerHTML = "";
+        for (let id of semanales) {
             const info = await obtenerJuego(id);
-            contenedor.appendChild(crearCardJuego(info));
-        } catch (error) { console.error(error); }
+            if(info) contSemanales.appendChild(crearCard(info, false));
+        }
     }
 }
 
-// Iniciar
-document.addEventListener("DOMContentLoaded", () => {
-    cargarDestacados();
-    cargarTopJuegos();
-    cargarSeccion(semanales, ".juegos_semanales");
-});
+document.addEventListener("DOMContentLoaded", cargarTodo);
