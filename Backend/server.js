@@ -3,8 +3,9 @@
 // ==========================================
 const express = require("express");
 const cors = require("cors");
-const pool = require('./db');
-const authRoutes = require('./auth');
+const pool = require('./db');       // Conexión a la Base de Datos
+const authRoutes = require('./auth'); // Rutas de Login/Registro
+const adminAuth = require('./middleware'); // Middleware de Admin
 
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -25,73 +26,47 @@ const STEAM_HEADERS = {
 };
 
 // ==========================================
-// 3. RUTAS DE SISTEMA
+// 3. RUTAS DE SISTEMA (LOGIN)
 // ==========================================
 app.use('/api/auth', authRoutes);
 
-// RUTA MAESTRA PARA CREAR TODAS LAS TABLAS (INCLUYENDO LA NUEVA DE LIKES)
-app.get('/crear-tablas-general', async (req, res) => {
-    try {
-        await pool.query(`CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username VARCHAR(50) UNIQUE NOT NULL, password VARCHAR(255) NOT NULL, role VARCHAR(20) DEFAULT 'user', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`);
-        await pool.query(`CREATE TABLE IF NOT EXISTS reviews (id SERIAL PRIMARY KEY, game_id VARCHAR(50) NOT NULL, username VARCHAR(50) NOT NULL, comment TEXT NOT NULL, rating INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`);
-        await pool.query(`CREATE TABLE IF NOT EXISTS wishlist (id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL, game_id VARCHAR(50) NOT NULL, game_name VARCHAR(255), game_image TEXT, added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, UNIQUE(username, game_id));`);
-        
-        // [NUEVA] Tabla de Likes
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS review_likes (
-                id SERIAL PRIMARY KEY,
-                review_id INT NOT NULL,
-                username VARCHAR(50) NOT NULL,
-                UNIQUE(review_id, username) -- Un usuario solo puede dar 1 like por review
-            );
-        `);
-        
-        res.send("✅ Tablas verificadas (Users, Reviews, Wishlist, Likes).");
-    } catch (error) { res.status(500).send("Error BD: " + error.message); }
-});
+// (Aquí eliminamos la ruta /crear-tablas-general. Tu BD ya está lista)
 
 // ==========================================
-// 4. RUTAS DE LIKES (NUEVO SISTEMA)
+// 4. RUTAS DE LIKES (SISTEMA DE VOTOS)
 // ==========================================
 
-// Dar o Quitar Like (Toggle)
+// Dar o Quitar Like
 app.post('/api/reviews/like', async (req, res) => {
     const { review_id, username } = req.body;
     try {
-        // 1. Verificar si ya dio like
         const check = await pool.query('SELECT * FROM review_likes WHERE review_id = $1 AND username = $2', [review_id, username]);
         
         if (check.rows.length > 0) {
-            // Si ya existe, lo BORRAMOS (Quitar like)
             await pool.query('DELETE FROM review_likes WHERE review_id = $1 AND username = $2', [review_id, username]);
             res.json({ action: 'removed' });
         } else {
-            // Si no existe, lo AGREGAMOS (Dar like)
             await pool.query('INSERT INTO review_likes (review_id, username) VALUES ($1, $2)', [review_id, username]);
             res.json({ action: 'added' });
         }
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// Obtener lista de reviews que "YO" he likeado en este juego (para pintarlos azul)
+// Ver mis likes en un juego
 app.get('/api/user-likes/:game_id/:username', async (req, res) => {
     const { game_id, username } = req.params;
     try {
-        // Buscamos los likes de este usuario en reviews de este juego
         const result = await pool.query(`
-            SELECT rl.review_id 
-            FROM review_likes rl
+            SELECT rl.review_id FROM review_likes rl
             JOIN reviews r ON rl.review_id = r.id
             WHERE r.game_id = $1 AND rl.username = $2
         `, [game_id, username]);
-        
-        // Devolvemos un array simple de IDs: [15, 22, 30...]
         res.json(result.rows.map(row => row.review_id));
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 // ==========================================
-// 5. RUTAS DE RESEÑAS (MODIFICADA PARA CONTAR LIKES)
+// 5. RUTAS DE RESEÑAS
 // ==========================================
 app.post('/api/reviews', async (req, res) => {
     const { game_id, username, comment, rating } = req.body;
@@ -102,36 +77,32 @@ app.post('/api/reviews', async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// Obtener reseñas + Cantidad de Likes
+// Obtener reseñas con conteo de likes
 app.get('/api/reviews/:game_id', async (req, res) => {
     const { game_id } = req.params;
     try {
-        // Subconsulta para contar los likes de cada reseña
         const query = `
-            SELECT r.*, 
-            (SELECT COUNT(*) FROM review_likes rl WHERE rl.review_id = r.id)::int as likes_count
-            FROM reviews r 
-            WHERE r.game_id = $1 
-            ORDER BY created_at DESC
+            SELECT r.*, (SELECT COUNT(*) FROM review_likes rl WHERE rl.review_id = r.id)::int as likes_count
+            FROM reviews r WHERE r.game_id = $1 ORDER BY created_at DESC
         `;
         const result = await pool.query(query, [game_id]);
         res.json(result.rows);
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// [RUTAS DE ADMIN - MANTENIDAS]
-app.delete('/api/admin/reviews/:id', require('./middleware'), async (req, res) => {
+// Borrar Reseña (ADMIN)
+app.delete('/api/admin/reviews/:id', adminAuth, async (req, res) => {
     const { id } = req.params;
     try {
-        await pool.query('DELETE FROM review_likes WHERE review_id = $1', [id]); // Borrar likes primero
-        const result = await pool.query('DELETE FROM reviews WHERE id = $1', [id]);
+        await pool.query('DELETE FROM review_likes WHERE review_id = $1', [id]); // Primero likes
+        const result = await pool.query('DELETE FROM reviews WHERE id = $1', [id]); // Luego reseña
         if (result.rowCount === 0) return res.status(404).json({ message: "No encontrado" });
         res.json({ message: "Eliminado." });
     } catch (e) { res.status(500).send(e.message); }
 });
 
 // ==========================================
-// 6. RUTAS DE WISHLIST (MANTENIDAS)
+// 6. RUTAS DE WISHLIST
 // ==========================================
 app.post('/api/wishlist/add', async (req, res) => {
     const { username, game_id, game_name, game_image } = req.body;
@@ -166,7 +137,7 @@ app.get('/api/wishlist/check/:username/:game_id', async (req, res) => {
 });
 
 // ==========================================
-// 7. RUTAS DE STEAM (MANTENIDAS)
+// 7. RUTAS DE STEAM (API JUEGOS)
 // ==========================================
 app.get("/api/game/:id", async (req, res) => {
   const { id } = req.params;
@@ -210,4 +181,7 @@ app.get("/api/top-games", async (req, res) => {
   } catch (e) { res.json([]); }
 });
 
-app.listen(PORT, () => { console.log(`🚀 Servidor V4 (Likes) listo en ${PORT}`); });
+// ==========================================
+// 8. INICIO
+// ==========================================
+app.listen(PORT, () => { console.log(`🚀 Servidor Full Stack limpio listo en ${PORT}`); });
