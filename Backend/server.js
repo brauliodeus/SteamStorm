@@ -3,8 +3,9 @@
 // ==========================================
 const express = require("express");
 const cors = require("cors");
-const pool = require('./db');       // Base de Datos
-const authRoutes = require('./auth'); // Login/Registro/Password
+const pool = require('./db');         // Base de Datos
+const authRoutes = require('./auth'); // Login/Registro
+const adminAuth = require('./middleware'); // <--- ¡ESTA ERA LA LÍNEA QUE FALTABA!
 
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -18,7 +19,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());             
 app.use(express.json());     
 
-// Cabeceras anti-bloqueo de Steam
 const STEAM_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept': 'application/json',
@@ -26,24 +26,22 @@ const STEAM_HEADERS = {
 };
 
 // ==========================================
-// 3. RUTAS DE SISTEMA (Login y Creación Tablas)
+// 3. RUTAS DE SISTEMA
 // ==========================================
 app.use('/api/auth', authRoutes);
 
-// RUTA MAESTRA PARA CREAR/VERIFICAR TODAS LAS TABLAS
-// Visitar: https://steamstorm.onrender.com/crear-tablas-general
+// Crear Tablas (Incluye columna 'role' en users)
 app.get('/crear-tablas-general', async (req, res) => {
     try {
-        // 1. Tabla Usuarios
         await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 username VARCHAR(50) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
+                role VARCHAR(20) DEFAULT 'user',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        // 2. Tabla Reseñas
         await pool.query(`
             CREATE TABLE IF NOT EXISTS reviews (
                 id SERIAL PRIMARY KEY,
@@ -54,7 +52,6 @@ app.get('/crear-tablas-general', async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        // 3. Tabla Wishlist (Lista de Deseados)
         await pool.query(`
             CREATE TABLE IF NOT EXISTS wishlist (
                 id SERIAL PRIMARY KEY,
@@ -66,15 +63,13 @@ app.get('/crear-tablas-general', async (req, res) => {
                 UNIQUE(username, game_id) 
             );
         `);
-        res.send("✅ Tablas (Users, Reviews, Wishlist) verificadas correctamente.");
+        res.send("✅ Tablas (Users, Reviews, Wishlist) verificadas.");
     } catch (error) { res.status(500).send("Error BD: " + error.message); }
 });
 
 // ==========================================
 // 4. RUTAS DE WISHLIST
 // ==========================================
-
-// Agregar a favoritos
 app.post('/api/wishlist/add', async (req, res) => {
     const { username, game_id, game_name, game_image } = req.body;
     try {
@@ -86,39 +81,27 @@ app.post('/api/wishlist/add', async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// Eliminar de favoritos
 app.delete('/api/wishlist/remove', async (req, res) => {
     const { username, game_id } = req.body;
     try {
-        await pool.query(
-            'DELETE FROM wishlist WHERE username = $1 AND game_id = $2',
-            [username, game_id]
-        );
+        await pool.query('DELETE FROM wishlist WHERE username = $1 AND game_id = $2', [username, String(game_id)]);
         res.json({ message: "Eliminado de lista de deseados" });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// Verificar si ya está guardado
-app.get('/api/wishlist/check/:username/:game_id', async (req, res) => {
-    const { username, game_id } = req.params;
-    try {
-        const result = await pool.query(
-            'SELECT * FROM wishlist WHERE username = $1 AND game_id = $2',
-            [username, game_id]
-        );
-        res.json({ is_in_wishlist: result.rows.length > 0 });
-    } catch (error) { res.status(500).json({ error: error.message }); }
-});
-
-// Obtener TODA la lista (Para la página wishlist.html)
 app.get('/api/wishlist/getall/:username', async (req, res) => {
     const { username } = req.params;
     try {
-        const result = await pool.query(
-            'SELECT * FROM wishlist WHERE username = $1 ORDER BY added_at DESC',
-            [username]
-        );
+        const result = await pool.query('SELECT * FROM wishlist WHERE username = $1 ORDER BY added_at DESC', [username]);
         res.json(result.rows);
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.get('/api/wishlist/check/:username/:game_id', async (req, res) => {
+    const { username, game_id } = req.params;
+    try {
+        const result = await pool.query('SELECT * FROM wishlist WHERE username = $1 AND game_id = $2', [username, String(game_id)]);
+        res.json({ is_in_wishlist: result.rows.length > 0 });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
@@ -127,12 +110,8 @@ app.get('/api/wishlist/getall/:username', async (req, res) => {
 // ==========================================
 app.post('/api/reviews', async (req, res) => {
     const { game_id, username, comment, rating } = req.body;
-    if (!game_id || !username || !comment) return res.status(400).json({error: "Faltan datos"});
     try {
-        await pool.query(
-            'INSERT INTO reviews (game_id, username, comment, rating) VALUES ($1, $2, $3, $4)',
-            [game_id, username, comment, rating]
-        );
+        await pool.query('INSERT INTO reviews (game_id, username, comment, rating) VALUES ($1, $2, $3, $4)', [game_id, username, comment, rating]);
         res.json({ message: "Reseña guardada" });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
@@ -146,17 +125,14 @@ app.get('/api/reviews/:game_id', async (req, res) => {
 });
 
 // ==========================================
-// 6. RUTAS DE STEAM API (Juegos)
+// 6. RUTAS DE STEAM API
 // ==========================================
-
-// A. Detalle
 app.get("/api/game/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const infoRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`, { headers: STEAM_HEADERS });
     const infoData = await infoRes.json();
-
-    if (!infoData || !infoData[id] || !infoData[id].success) throw new Error("Steam bloqueó o ID inválido");
+    if (!infoData || !infoData[id] || !infoData[id].success) throw new Error("Steam bloqueó");
 
     const reviewRes = await fetch(`https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=recent`, { headers: STEAM_HEADERS });
     const reviewData = await reviewRes.json();
@@ -170,72 +146,55 @@ app.get("/api/game/:id", async (req, res) => {
     }));
 
     res.json({
-      appid: id,
-      name: infoData[id].data.name,
-      header_image: infoData[id].data.header_image,
+      appid: id, name: infoData[id].data.name, header_image: infoData[id].data.header_image,
       short_description: infoData[id].data.short_description,
-      valoracion: reviewData.query_summary?.review_score_desc || "Sin calificar",
-      porcentaje_positivo: porcentajePositivo,
-      total_reviews: total,
-      reseñas_steam: reseñas,
+      valoracion: reviewData.query_summary?.review_score_desc || "N/A",
+      porcentaje_positivo: porcentajePositivo, total_reviews: total, reseñas_steam: reseñas,
       genres: infoData[id].data.genres ? infoData[id].data.genres.map(g => g.description) : ["Desconocido"],
     });
-  } catch (err) {
-    console.error(`❌ Error juego ${id}:`, err.message);
-    res.status(500).json({ error: "No se pudo obtener datos de Steam" });
-  }
+  } catch (err) { res.status(500).json({ error: "Error Steam" }); }
 });
 
-// B. Top Juegos (Lista Completa)
 app.get("/api/top-games", async (req, res) => {
   try {
-    const appIDs = [
-      413150, 105600, 883710, 582010, 374320, 1687950, 1817070, 1172470, 252490, 945360, 
-      1086940, 1245620, 1174180, 292030, 1593500, 814380, 1091500, 271590, 2050650, 1145360, 620, 367520, 550, 730, 570
-    ];
+    const appIDs = [413150, 105600, 883710, 582010, 374320, 1687950, 1817070, 1172470, 252490, 945360, 1086940, 1245620, 1174180, 292030, 1593500, 814380, 1091500, 271590, 2050650, 1145360, 620, 367520, 550, 730, 570];
     const juegos = [];
-
     for (const id of appIDs) {
       try {
           const infoRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`, { headers: STEAM_HEADERS });
           const infoData = await infoRes.json();
           if (!infoData || !infoData[id] || !infoData[id].success) continue; 
-
           const reviewRes = await fetch(`https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=summary`, { headers: STEAM_HEADERS });
           const reviewData = await reviewRes.json();
-
-          const total = reviewData.query_summary?.total_reviews || 1;
-          const positivos = reviewData.query_summary?.total_positive || 0;
-          const score = (positivos / total) * 100;
-
+          const score = (reviewData.query_summary.total_positive / (reviewData.query_summary.total_reviews || 1)) * 100;
           juegos.push({
-            appid: id,
-            name: infoData[id].data.name,
-            header_image: infoData[id].data.header_image,
-            short_description: infoData[id].data.short_description,
-            porcentaje_positivo: Math.round(score),
+            appid: id, name: infoData[id].data.name, header_image: infoData[id].data.header_image,
+            short_description: infoData[id].data.short_description, porcentaje_positivo: Math.round(score),
             valoracion: reviewData.query_summary?.review_score_desc || "N/A",
             genres: infoData[id].data.genres ? infoData[id].data.genres.map(g => g.description) : ["Desconocido"],
           });
-      } catch (innerErr) { console.error(`Error procesando ${id}:`, innerErr.message); }
+      } catch (e) { console.log(e.message); }
     }
     res.json(juegos.sort((a, b) => b.porcentaje_positivo - a.porcentaje_positivo).slice(0, 24));
   } catch (error) { res.json([]); }
 });
-// Ruta protegida: Solo Admins pueden ver la lista de todos los usuarios
+
+// ==========================================
+// 7. RUTAS DE ADMINISTRADOR (PROTEGIDAS)
+// ==========================================
+
+// Ver usuarios (Ahora sí funciona porque importamos adminAuth)
 app.get('/api/admin/users', adminAuth, async (req, res) => {
     try {
-        const result = await pool.query('SELECT id, username, role, created_at FROM users');
+        const result = await pool.query('SELECT id, username, role, created_at FROM users ORDER BY id ASC');
         res.json(result.rows);
     } catch (error) {
+        console.error(error);
         res.status(500).send('Error del servidor');
     }
 });
 
-// Ruta protegida: Borrar un juego de la base de datos (si lo implementas a futuro)
-// app.delete('/api/admin/game/:id', adminAuth, ...);
-
 // ==========================================
-// 7. INICIO
+// 8. INICIO
 // ==========================================
 app.listen(PORT, () => { console.log(`🚀 Servidor Full Stack listo en puerto ${PORT}`); });
