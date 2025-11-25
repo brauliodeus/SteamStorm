@@ -4,8 +4,8 @@
 const express = require("express");
 const cors = require("cors");
 const pool = require('./db');         // Base de Datos
-const authRoutes = require('./auth'); // Login/Registro
-const adminAuth = require('./middleware'); // <--- ¡ESTA ERA LA LÍNEA QUE FALTABA!
+const authRoutes = require('./auth'); // Auth
+const adminAuth = require('./middleware'); // <--- IMPORTANTE: Middleware de Admin
 
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -30,54 +30,49 @@ const STEAM_HEADERS = {
 // ==========================================
 app.use('/api/auth', authRoutes);
 
-// Crear Tablas (Incluye columna 'role' en users)
+// Ruta Maestra de Tablas
 app.get('/crear-tablas-general', async (req, res) => {
     try {
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(50) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                role VARCHAR(20) DEFAULT 'user',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS reviews (
-                id SERIAL PRIMARY KEY,
-                game_id VARCHAR(50) NOT NULL,
-                username VARCHAR(50) NOT NULL,
-                comment TEXT NOT NULL,
-                rating INT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS wishlist (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(50) NOT NULL,
-                game_id VARCHAR(50) NOT NULL,
-                game_name VARCHAR(255),
-                game_image TEXT,
-                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(username, game_id) 
-            );
-        `);
-        res.send("✅ Tablas (Users, Reviews, Wishlist) verificadas.");
+        await pool.query(`CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username VARCHAR(50) UNIQUE NOT NULL, password VARCHAR(255) NOT NULL, role VARCHAR(20) DEFAULT 'user', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS reviews (id SERIAL PRIMARY KEY, game_id VARCHAR(50) NOT NULL, username VARCHAR(50) NOT NULL, comment TEXT NOT NULL, rating INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS wishlist (id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL, game_id VARCHAR(50) NOT NULL, game_name VARCHAR(255), game_image TEXT, added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, UNIQUE(username, game_id));`);
+        res.send("✅ Tablas verificadas (Users, Reviews, Wishlist).");
     } catch (error) { res.status(500).send("Error BD: " + error.message); }
 });
 
 // ==========================================
-// 4. RUTAS DE WISHLIST
+// 4. RUTAS DE ADMIN (RECUPERADAS) 🛡️
+// ==========================================
+
+// Eliminar reseña (Solo Admin)
+app.delete('/api/admin/reviews/:id', adminAuth, async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query('DELETE FROM reviews WHERE id = $1', [id]);
+        if (result.rowCount === 0) return res.status(404).json({ message: "Reseña no encontrada" });
+        res.json({ message: "Reseña eliminada por el administrador." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al eliminar reseña.');
+    }
+});
+
+// Ver usuarios (Solo Admin - Opcional)
+app.get('/api/admin/users', adminAuth, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, username, role, created_at FROM users ORDER BY id ASC');
+        res.json(result.rows);
+    } catch (error) { res.status(500).send('Error del servidor'); }
+});
+
+// ==========================================
+// 5. RUTAS DE WISHLIST
 // ==========================================
 app.post('/api/wishlist/add', async (req, res) => {
     const { username, game_id, game_name, game_image } = req.body;
     try {
-        await pool.query(
-            'INSERT INTO wishlist (username, game_id, game_name, game_image) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
-            [username, game_id, game_name, game_image]
-        );
-        res.json({ message: "Añadido a lista de deseados" });
+        await pool.query('INSERT INTO wishlist (username, game_id, game_name, game_image) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING', [username, game_id, game_name, game_image]);
+        res.json({ message: "Añadido a wishlist" });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
@@ -85,7 +80,7 @@ app.delete('/api/wishlist/remove', async (req, res) => {
     const { username, game_id } = req.body;
     try {
         await pool.query('DELETE FROM wishlist WHERE username = $1 AND game_id = $2', [username, String(game_id)]);
-        res.json({ message: "Eliminado de lista de deseados" });
+        res.json({ message: "Eliminado de wishlist" });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
@@ -106,10 +101,11 @@ app.get('/api/wishlist/check/:username/:game_id', async (req, res) => {
 });
 
 // ==========================================
-// 5. RUTAS DE RESEÑAS
+// 6. RUTAS DE RESEÑAS PÚBLICAS
 // ==========================================
 app.post('/api/reviews', async (req, res) => {
     const { game_id, username, comment, rating } = req.body;
+    if (!game_id || !username || !comment) return res.status(400).json({error: "Faltan datos"});
     try {
         await pool.query('INSERT INTO reviews (game_id, username, comment, rating) VALUES ($1, $2, $3, $4)', [game_id, username, comment, rating]);
         res.json({ message: "Reseña guardada" });
@@ -125,7 +121,7 @@ app.get('/api/reviews/:game_id', async (req, res) => {
 });
 
 // ==========================================
-// 6. RUTAS DE STEAM API
+// 7. RUTAS DE STEAM
 // ==========================================
 app.get("/api/game/:id", async (req, res) => {
   const { id } = req.params;
@@ -180,21 +176,6 @@ app.get("/api/top-games", async (req, res) => {
 });
 
 // ==========================================
-// 7. RUTAS DE ADMINISTRADOR (PROTEGIDAS)
-// ==========================================
-
-// Ver usuarios (Ahora sí funciona porque importamos adminAuth)
-app.get('/api/admin/users', adminAuth, async (req, res) => {
-    try {
-        const result = await pool.query('SELECT id, username, role, created_at FROM users ORDER BY id ASC');
-        res.json(result.rows);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error del servidor');
-    }
-});
-
-// ==========================================
 // 8. INICIO
 // ==========================================
-app.listen(PORT, () => { console.log(`🚀 Servidor Full Stack listo en puerto ${PORT}`); });
+app.listen(PORT, () => { console.log(`🚀 Servidor listo en puerto ${PORT}`); });
