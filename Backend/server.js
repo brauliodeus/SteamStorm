@@ -222,6 +222,18 @@ app.get("/api/top-games", async (req, res) => {
     res.json(juegos.sort((a, b) => b.porcentaje_positivo - a.porcentaje_positivo).slice(0, 24));
   } catch (error) { res.json([]); }
 });
+// Ruta protegida: Solo Admins pueden ver la lista de todos los usuarios
+app.get('/api/admin/users', adminAuth, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, username, role, created_at FROM users');
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).send('Error del servidor');
+    }
+});
+
+// Ruta protegida: Borrar un juego de la base de datos (si lo implementas a futuro)
+// app.delete('/api/admin/game/:id', adminAuth, ...);
 
 // ==========================================
 // 7. INICIO
