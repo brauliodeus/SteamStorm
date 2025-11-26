@@ -44,7 +44,7 @@ router.post('/register', async (req, res) => {
 });
 
 // ==========================================
-// 2. INICIAR SESIÓN (LOGIN) - MODIFICADO
+// 2. INICIAR SESIÓN (LOGIN)
 // ==========================================
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -144,7 +144,7 @@ router.post('/change-password', async (req, res) => {
 });
 
 // ==========================================
-// 4. ELIMINAR USUARIO (SOLO ADMIN O DUEÑO)
+// 4. ELIMINAR USUARIO (SOLO ADMININISTRADOR)
 // ==========================================
 router.delete('/delete', async (req, res) => {
     const { username } = req.body;

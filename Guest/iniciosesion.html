@@ -67,7 +67,7 @@
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('username', data.user.username);
                     
-                    // 2. [NUEVO] GUARDAR EL ROL (Vital para funciones de Admin)
+                    // (Vital para funciones de Admin)
                     if (data.user.role) {
                         localStorage.setItem('role', data.user.role);
                     } else {

@@ -30,8 +30,6 @@ const STEAM_HEADERS = {
 // ==========================================
 app.use('/api/auth', authRoutes);
 
-// (Aquí eliminamos la ruta /crear-tablas-general. Tu BD ya está lista)
-
 // ==========================================
 // 4. RUTAS DE LIKES (SISTEMA DE VOTOS)
 // ==========================================
