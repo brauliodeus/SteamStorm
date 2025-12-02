@@ -16,19 +16,23 @@
         <img src="../Images/steamstorm_logo_alpha2.png" alt="Logo" width="200" height="54">
     </div>
     
-    <div class="sub_encabezado"> 
+    <div class="sub_encabezado">
+        <input type="text" id="buscador" placeholder="Buscar juegos"> 
         <a href="#destacados" class="espaciado_letras_sub">Destacados</a>
         <a href="#topjuegos" class="espaciado_letras_sub">Top juegos</a> 
-        <a href="#juegossemanales" class="espaciado_letras_sub">Juegos semanales</a>
+        <a href="#juegossemanales" class="espaciado_letras_sub">Ranking Juegos</a>
     </div>
+
+    <div id="resultados"></div>
 
     <div id="menu">
         <ul>
+            <li class="fa-solid fa-window-maximize" style="color:#00aaff;"><a href="inicio_guest.html"> | Inicio</a></li>
             <li class="fa-regular fa-user"><a href="iniciosesion.html"> | Iniciar Sesión</a></li>
             <li class="fa-regular fa-id-card"><a href="crearcuenta.html"> | Registrarse </a></li>
-            <li class="fa-regular fa-compass"><a href="../Guest/nosotros_guest.html"> | Sobre nosotros</a></li>
-            <li class="fa-regular fa-thumbs-up"><a href="../Guest/privacidad_guest.html"> | Política de privacidad</a></li>
-            <li class="fa-regular fa-comment"><a href="../Guest/soporte_guest.html"> | Soporte</a></li>
+            <li class="fa-regular fa-compass"><a href="nosotros_guest.html"> | Sobre nosotros</a></li>
+            <li class="fa-regular fa-thumbs-up"><a href="privacidad_guest.html"> | Política de privacidad</a></li>
+            <li class="fa-regular fa-comment"><a href="soporte_guest.html"> | Soporte</a></li>
         </ul>
     </div>
 
@@ -40,7 +44,7 @@
     <div class="letras_topjuegos"><h3 id="topjuegos">TOP JUEGOS</h3></div>
     <div class="juegos_top"></div>
 
-    <div class="letras_juegossemanales"><h3 id="juegossemanales">JUEGOS SEMANALES</h3></div>
+    <div class="letras_juegossemanales"><h3 id="juegossemanales">RANKING JUEGOS</h3></div>
     <div class="juegos_semanales"></div>
 
     <script src="../Scripts/script_Menu.js"></script>

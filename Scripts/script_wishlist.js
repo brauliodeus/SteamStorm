@@ -106,7 +106,7 @@ function renderGames(listaJuegos) {
                 
                 <div style="margin-top:15px; text-align:right;">
                     <div class="date-added">Añadido el ${fechaAgregado}</div>
-                    <div class="remove-link" onclick="eliminarJuego('${item.game_id}')">( eliminar )</div>
+                    <div class="remove-link" onclick="eliminarJuego('${item.game_id}')">Eliminar</div>
                 </div>
             </div>
         `;

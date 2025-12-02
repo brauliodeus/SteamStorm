@@ -177,3 +177,66 @@ function buscarEnBackup(id) {
     if (!id) return BACKUP_GAMES;
     return BACKUP_GAMES.find(g => String(g.appid) === String(id));
 }
+
+const input = document.getElementById("buscador");
+const contenedor = document.getElementById("resultados");
+
+// Ocultar resultados al iniciar
+contenedor.style.display = "none";
+
+// Detecta escritura en el buscador
+input.addEventListener("input", () => {
+    const texto = input.value.toLowerCase();
+
+    // Si está vacío → oculta contenedor y no muestra nada
+    if (texto.trim() === "") {
+        contenedor.innerHTML = "";
+        contenedor.style.display = "none";
+        return;
+    }
+
+    const filtrados = BACKUP_GAMES.filter(juego =>
+        juego.name.toLowerCase().includes(texto) ||
+        juego.genres.join(" ").toLowerCase().includes(texto)
+    );
+
+    mostrarResultados(filtrados);
+});
+
+
+// Función para renderizar resultados
+function mostrarResultados(lista){
+    contenedor.innerHTML = ""; // Limpia resultados previos
+
+    // Mostrar contenedor al buscar
+    contenedor.style.display = "block";
+
+    if(lista.length === 0){
+        contenedor.innerHTML = "<p>No se encontraron resultados...</p>";
+        return;
+    }
+
+    lista.forEach(juego => {
+        const div = document.createElement("div");
+        div.style.cursor = "pointer"; // hace clickeable
+
+        div.innerHTML = `
+            <div style="display:flex;align-items:center;margin:6px;padding:6px;border-radius:5px;">
+                <img src="${juego.header_image}" width="120" style="border-radius:5px;margin-right:12px;">
+                <div>
+                    <h3>${juego.name}</h3>
+                    <p>${juego.short_description}</p>
+                    <b>⭐ ${juego.valoracion} (${juego.porcentaje_positivo}% positivos)</b><br>
+                    <small>Géneros: ${juego.genres.join(", ")}</small>
+                </div>
+            </div>
+        `;
+
+        // 🔥 Redirigir al HTML del detalle del juego al hacer click
+        div.addEventListener("click", () => {
+            window.location.href = `detalle.html?id=${encodeURIComponent(juego.appid)}`;
+        });
+
+        contenedor.appendChild(div);
+    });
+}

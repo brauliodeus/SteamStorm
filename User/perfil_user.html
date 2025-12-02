@@ -10,127 +10,7 @@
     <link rel="icon" type="image/png" href="../Images/favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../CSS/style_inicio.css">
-    
-    <style>
-        /* Fondo global estilo Steam */
-        body {
-            background-color: #171a21;
-            background-image: radial-gradient(circle at top, #1b2838 0%, #171a21 100%);
-            color: #c6d4df;
-        }
-
-        .perfil-container {
-            max-width: 940px;
-            margin: 120px auto 50px auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* === SECCIÓN 1: CABECERA DE USUARIO === */
-        .profile-header {
-            display: flex;
-            align-items: center;
-            background: linear-gradient(to right, rgba(34, 47, 66, 0.9), rgba(23, 26, 33, 0.9));
-            padding: 20px;
-            border-radius: 5px;
-            border: 1px solid #000;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-
-        .avatar-frame {
-            width: 120px;
-            height: 120px;
-            padding: 2px;
-            background: linear-gradient(to bottom, #66c0f4, #1b2838);
-            margin-right: 25px;
-        }
-
-        .avatar-img {
-            width: 100%; height: 100%;
-            background-color: #171a21;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 60px; color: #66c0f4;
-        }
-
-        .user-details h1 {
-            margin: 0;
-            font-family: "Arial", sans-serif;
-            font-size: 32px;
-            color: #ffffff;
-            text-shadow: 1px 1px 5px #000;
-        }
-
-        .user-details p { margin: 5px 0 0 0; color: #8f98a0; font-size: 14px; }
-        .status-online { color: #66c0f4; font-weight: bold; font-size: 16px; margin-top: 5px; }
-
-        /* === SECCIÓN 2: SEGURIDAD / CAMBIO PASSWORD === */
-        .settings-box {
-            background-color: rgba(0, 0, 0, 0.2);
-            padding: 30px;
-            border-radius: 5px;
-            border-top: 2px solid #2a475e;
-        }
-
-        .settings-title {
-            font-size: 22px; color: white; margin-bottom: 20px; border-bottom: 1px solid #3d4c5d; padding-bottom: 10px;
-            display: flex; align-items: center; gap: 10px;
-        }
-
-        .form-group { margin-bottom: 15px; max-width: 400px; }
-        .form-group label { display: block; color: #66c0f4; margin-bottom: 5px; font-size: 13px; }
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            background-color: #101216;
-            border: 1px solid #3d4c5d;
-            color: white;
-            border-radius: 3px;
-            font-size: 14px;
-        }
-        .form-group input:focus { outline: none; border-color: #66c0f4; }
-
-        .btn-save {
-            background: linear-gradient(to bottom, #47bfff 5%, #1a44c2 60%);
-            border: none;
-            color: white;
-            padding: 10px 25px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 15px;
-            margin-top: 10px;
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.3);
-        }
-        .btn-save:hover { background: linear-gradient(to bottom, #5dd0ff 5%, #2355e6 60%); }
-
-        /* === SECCIÓN 3: ZONA DE PELIGRO (Logout) === */
-        .danger-zone {
-            margin-top: 30px;
-            border-top: 1px solid #3d4c5d;
-            padding-top: 20px;
-            text-align: right;
-        }
-        
-        .btn-logout {
-            background: transparent;
-            border: 1px solid #ff4d4d;
-            color: #ff4d4d;
-            padding: 8px 15px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.3s;
-        }
-        .btn-logout:hover { background: #ff4d4d; color: white; }
-
-        /* Ajuste móvil */
-        @media (max-width: 768px) {
-            .profile-header { flex-direction: column; text-align: center; }
-            .avatar-frame { margin: 0 auto 15px auto; }
-            .danger-zone { text-align: center; }
-        }
-    </style>
+    <link rel="stylesheet" href="../CSS/style_perfil.css">
 </head>
 <body>
 
@@ -145,7 +25,7 @@
     <div id="menu">
         <ul>
             <li class="fa-regular fa-window-maximize"><a href="inicio_user.html"> | Inicio </a></li>
-            <li class="fa-solid fa-user" style="color:#66fcf1;"><a href="perfil_user.html"> | Mi Perfil </a></li>
+            <li class="fa-solid fa-user" style="color:#00aaff;"><a href="perfil_user.html"> | Mi Perfil </a></li>
             <li class="fa-regular fa-heart"><a href="wishlist.html"> | Lista de Deseados </a></li>
             <li class="fa-regular fa-compass"><a href="nosotros_user.html"> | Sobre nosotros</a></li>
             <li class="fa-regular fa-thumbs-up"><a href="privacidad_user.html"> | Política de privacidad</a></li>
