@@ -1,4 +1,4 @@
-# ⚡ SteamStorm - Plataforma de Reseñas y Gestión de Videojuegos
+# SteamStorm - Plataforma de Reseñas y Gestión de Videojuegos
 
 ![Estado](https://img.shields.io/badge/Estado-Finalizado-success?style=for-the-badge)
 ![Node](https://img.shields.io/badge/Node.js-v20+-green?style=for-the-badge&logo=nodedotjs)
