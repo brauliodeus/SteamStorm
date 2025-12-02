@@ -6,6 +6,7 @@ const cors = require("cors");
 const pool = require('./db');       // Conexión a la Base de Datos
 const authRoutes = require('./auth'); // Rutas de Login/Registro
 const adminAuth = require('./middleware'); // Middleware de Admin
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const fetch = (...args) =>
     import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -24,6 +25,7 @@ const STEAM_HEADERS = {
     'Accept': 'application/json',
     'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
 };
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // ==========================================
 // 3. RUTAS DE SISTEMA (LOGIN)
@@ -73,6 +75,40 @@ app.post('/api/reviews', async (req, res) => {
         await pool.query('INSERT INTO reviews (game_id, username, comment, rating) VALUES ($1, $2, $3, $4)', [game_id, username, comment, rating]);
         res.json({ message: "Reseña guardada" });
     } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.post('/api/chat', async (req, res) => {
+    const { message } = req.body;
+
+    try {
+        // Elegimos el modelo
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+        // Le damos una personalidad al bot (Prompt del Sistema)
+        const prompt = `
+            Eres StormBot, el asistente experto de la plataforma de videojuegos "SteamStorm".
+            Tu trabajo es recomendar juegos, explicar de qué tratan y ayudar a los usuarios.
+            
+            Información sobre SteamStorm:
+            - Es una plataforma para ver reseñas y guardar favoritos.
+            - Tenemos juegos como Baldur's Gate 3, Elden Ring, Stardew Valley, etc.
+            - Los usuarios pueden registrarse y dejar comentarios.
+            
+            Responde de forma breve, amigable y 'gamer'. Si te preguntan algo que no sea de videojuegos, di que solo sabes de juegos.
+            
+            Pregunta del usuario: ${message}
+        `;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        res.json({ reply: text });
+
+    } catch (error) {
+        console.error("Error IA:", error);
+        res.status(500).json({ reply: "Lo siento, mis circuitos están sobrecalentados. Intenta luego." });
+    }
 });
 
 // Obtener reseñas con conteo de likes
