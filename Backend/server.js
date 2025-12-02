@@ -8,7 +8,7 @@ const authRoutes = require('./auth'); // Rutas de Login/Registro
 const adminAuth = require('./middleware'); // Middleware de Admin
 
 const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+    import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,8 +16,8 @@ const PORT = process.env.PORT || 3000;
 // ==========================================
 // 2. MIDDLEWARES
 // ==========================================
-app.use(cors());             
-app.use(express.json());     
+app.use(cors());
+app.use(express.json());
 
 const STEAM_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -39,7 +39,7 @@ app.post('/api/reviews/like', async (req, res) => {
     const { review_id, username } = req.body;
     try {
         const check = await pool.query('SELECT * FROM review_likes WHERE review_id = $1 AND username = $2', [review_id, username]);
-        
+
         if (check.rows.length > 0) {
             await pool.query('DELETE FROM review_likes WHERE review_id = $1 AND username = $2', [review_id, username]);
             res.json({ action: 'removed' });
@@ -68,7 +68,7 @@ app.get('/api/user-likes/:game_id/:username', async (req, res) => {
 // ==========================================
 app.post('/api/reviews', async (req, res) => {
     const { game_id, username, comment, rating } = req.body;
-    if (!game_id || !username || !comment) return res.status(400).json({error: "Faltan datos"});
+    if (!game_id || !username || !comment) return res.status(400).json({ error: "Faltan datos" });
     try {
         await pool.query('INSERT INTO reviews (game_id, username, comment, rating) VALUES ($1, $2, $3, $4)', [game_id, username, comment, rating]);
         res.json({ message: "Reseña guardada" });
@@ -138,48 +138,48 @@ app.get('/api/wishlist/check/:username/:game_id', async (req, res) => {
 // 7. RUTAS DE STEAM (API JUEGOS)
 // ==========================================
 app.get("/api/game/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const infoRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`, { headers: STEAM_HEADERS });
-    const infoData = await infoRes.json();
-    if (!infoData || !infoData[id] || !infoData[id].success) throw new Error("Block");
-    
-    const reviewRes = await fetch(`https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=recent`, { headers: STEAM_HEADERS });
-    const reviewData = await reviewRes.json();
-    const total = reviewData.query_summary?.total_reviews || 1;
-    const positivos = reviewData.query_summary?.total_positive || 0;
-    
-    res.json({
-      appid: id, name: infoData[id].data.name, header_image: infoData[id].data.header_image,
-      short_description: infoData[id].data.short_description,
-      valoracion: reviewData.query_summary?.review_score_desc || "N/A",
-      porcentaje_positivo: Math.round((positivos / total) * 100),
-      genres: infoData[id].data.genres ? infoData[id].data.genres.map(g => g.description) : ["Game"],
-    });
-  } catch (err) { res.status(500).json({ error: "Error" }); }
+    const { id } = req.params;
+    try {
+        const infoRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`, { headers: STEAM_HEADERS });
+        const infoData = await infoRes.json();
+        if (!infoData || !infoData[id] || !infoData[id].success) throw new Error("Block");
+
+        const reviewRes = await fetch(`https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=recent`, { headers: STEAM_HEADERS });
+        const reviewData = await reviewRes.json();
+        const total = reviewData.query_summary?.total_reviews || 1;
+        const positivos = reviewData.query_summary?.total_positive || 0;
+
+        res.json({
+            appid: id, name: infoData[id].data.name, header_image: infoData[id].data.header_image,
+            short_description: infoData[id].data.short_description,
+            valoracion: reviewData.query_summary?.review_score_desc || "N/A",
+            porcentaje_positivo: Math.round((positivos / total) * 100),
+            genres: infoData[id].data.genres ? infoData[id].data.genres.map(g => g.description) : ["Game"],
+        });
+    } catch (err) { res.status(500).json({ error: "Error" }); }
 });
 
 app.get("/api/top-games", async (req, res) => {
-  try {
-    const appIDs = [413150, 105600, 883710, 582010, 374320, 1687950, 1817070, 1172470, 252490, 945360, 1086940, 1245620, 1174180, 292030, 1593500, 814380, 1091500, 271590, 2050650, 1145360, 620, 367520, 550, 730, 570];
-    const juegos = [];
-    for (const id of appIDs) {
-      try {
-          const infoRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`, { headers: STEAM_HEADERS });
-          const d = await infoRes.json();
-          if (d && d[id] && d[id].success) {
-             const rRes = await fetch(`https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=summary`, { headers: STEAM_HEADERS });
-             const rD = await rRes.json();
-             const score = (rD.query_summary.total_positive / (rD.query_summary.total_reviews || 1)) * 100;
-             juegos.push({ appid: id, name: d[id].data.name, header_image: d[id].data.header_image, porcentaje_positivo: Math.round(score), genres: d[id].data.genres.map(g=>g.description) });
-          }
-      } catch (e) {}
-    }
-    res.json(juegos.slice(0,24));
-  } catch (e) { res.json([]); }
+    try {
+        const appIDs = [413150, 105600, 883710, 582010, 374320, 1687950, 1817070, 1172470, 252490, 945360, 1086940, 1245620, 1174180, 292030, 1593500, 814380, 1091500, 271590, 2050650, 1145360, 620, 367520, 550, 730, 570];
+        const juegos = [];
+        for (const id of appIDs) {
+            try {
+                const infoRes = await fetch(`https://store.steampowered.com/api/appdetails?appids=${id}&cc=us&l=spanish`, { headers: STEAM_HEADERS });
+                const d = await infoRes.json();
+                if (d && d[id] && d[id].success) {
+                    const rRes = await fetch(`https://store.steampowered.com/appreviews/${id}?json=1&language=spanish&filter=summary`, { headers: STEAM_HEADERS });
+                    const rD = await rRes.json();
+                    const score = (rD.query_summary.total_positive / (rD.query_summary.total_reviews || 1)) * 100;
+                    juegos.push({ appid: id, name: d[id].data.name, header_image: d[id].data.header_image, porcentaje_positivo: Math.round(score), genres: d[id].data.genres.map(g => g.description) });
+                }
+            } catch (e) { }
+        }
+        res.json(juegos.slice(0, 24));
+    } catch (e) { res.json([]); }
 });
 
 // ==========================================
 // 8. INICIO
 // ==========================================
-app.listen(PORT, () => { console.log(`🚀 Servidor Full Stack limpio listo en ${PORT}`); });
+app.listen(PORT, () => { console.log(`🚀 Servidor listo en ${PORT}`); });
