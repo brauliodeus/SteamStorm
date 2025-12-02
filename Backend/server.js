@@ -25,7 +25,7 @@ const STEAM_HEADERS = {
     'Accept': 'application/json',
     'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
 };
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // ==========================================
 // 3. RUTAS DE SISTEMA (LOGIN)
