@@ -82,8 +82,7 @@ app.post('/api/chat', async (req, res) => {
 
     try {
         // Elegimos el modelo
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         // Le damos una personalidad al bot (Prompt del Sistema)
         const prompt = `
             Eres StormBot, el asistente experto de la plataforma de videojuegos "SteamStorm".
