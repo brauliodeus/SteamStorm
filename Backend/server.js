@@ -81,9 +81,9 @@ app.post('/api/chat', async (req, res) => {
     const { message } = req.body;
 
     try {
-        // Elegimos el modelo
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        // Le damos una personalidad al bot (Prompt del Sistema)
+        // CORRECCIÓN: Usamos la versión específica 001
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+
         const prompt = `
             Eres StormBot, el asistente experto de la plataforma de videojuegos "SteamStorm".
             Tu trabajo es recomendar juegos, explicar de qué tratan y ayudar a los usuarios.
@@ -93,7 +93,8 @@ app.post('/api/chat', async (req, res) => {
             - Tenemos juegos como Baldur's Gate 3, Elden Ring, Stardew Valley, etc.
             - Los usuarios pueden registrarse y dejar comentarios.
             
-            Responde de forma breve, amigable y 'gamer'. Si te preguntan algo que no sea de videojuegos, di que solo sabes de juegos.
+            Responde de forma breve (máximo 2 párrafos), amigable y con tono 'gamer'. 
+            Si te preguntan algo que no sea de videojuegos, di amablemente que solo sabes de juegos.
             
             Pregunta del usuario: ${message}
         `;
@@ -105,8 +106,9 @@ app.post('/api/chat', async (req, res) => {
         res.json({ reply: text });
 
     } catch (error) {
-        console.error("Error IA:", error);
-        res.status(500).json({ reply: "Lo siento, mis circuitos están sobrecalentados. Intenta luego." });
+        console.error("❌ Error IA:", error);
+        // Si falla, enviamos el mensaje de error para verlo en el chat (solo para debug)
+        res.status(500).json({ reply: "Lo siento, mis circuitos están desconectados temporalmente. Intenta más tarde." });
     }
 });
 
