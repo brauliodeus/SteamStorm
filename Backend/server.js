@@ -82,8 +82,7 @@ app.post('/api/chat', async (req, res) => {
 
     try {
         // CORRECCIÓN: Usamos la versión específica 001
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
-
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
         const prompt = `
             Eres StormBot, el asistente experto de la plataforma de videojuegos "SteamStorm".
             Tu trabajo es recomendar juegos, explicar de qué tratan y ayudar a los usuarios.
