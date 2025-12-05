@@ -43,22 +43,23 @@ app.post('/api/chat', async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: `Eres StormBot, el asistente experto de la plataforma de videojuegos "SteamStorm".
-                    Tu misión es recomendar videojuegos y ayudar a los usuarios.
+                    content: `Eres StormBot, el asistente experto de SteamStorm.
+                    Tu misión es recomendar videojuegos y ayudar a los usuarios de la plataforma.
                     
                     Información sobre SteamStorm:
                     - Es una web para ver reseñas, ránkings y guardar juegos en lista de deseados.
                     - Tenemos juegos como Baldur's Gate 3, Elden Ring, Stardew Valley, etc.
                     
                     Responde de forma breve (máximo 3 líneas), divertida y 'gamer'. 
-                    Usa emojis. Si te preguntan algo que no sea de juegos, di que solo sabes de gaming.`
+                    Usa emojis. Si te preguntan algo que no sea de juegos, di amablemente que solo sabes de gaming.`
                 },
                 {
                     role: "user",
                     content: message
                 }
             ],
-            model: "llama3-8b-8192", // Modelo rápido y eficiente
+            // CAMBIO AQUÍ: Usamos el modelo nuevo
+            model: "llama-3.3-70b-versatile",
         });
 
         const reply = completion.choices[0]?.message?.content || "Me quedé sin palabras... 🎮";
