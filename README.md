@@ -15,6 +15,7 @@ La aplicación cuenta con una **arquitectura híbrida resiliente**: si la API ex
 
 * **🔐 Autenticación Segura:** Registro e Inicio de Sesión mediante **JWT** (JSON Web Tokens) y contraseñas encriptadas con **Bcrypt**.
 * **🎮 Catálogo Híbrido:** Obtención de datos vía **Steam Web API** con sistema de respaldo automático (Fallback) para evitar caídas por bloqueo de IP.
+* **🤖 Asistente IA (StormBot):** Chatbot integrado impulsado por **Groq (Llama 3)** que responde dudas y recomienda videojuegos a los usuarios en tiempo real.
 * **❤️ Lista de Deseados:** Los usuarios pueden guardar y eliminar juegos de su colección personal (Persistencia en Base de Datos).
 * **💬 Sistema de Reseñas:** Comentarios y puntuaciones en tiempo real.
 * **👍 Sistema de Likes:** Votación de reseñas con validación para evitar duplicados.
@@ -34,6 +35,7 @@ El proyecto utiliza una arquitectura desacoplada (Frontend separado del Backend)
 ### Backend (Servidor)
 * **Node.js:** Entorno de ejecución.
 * **Express.js:** Framework para el servidor y manejo de rutas.
+* **Groq SDK:** Integración de Inteligencia Artificial (Modelo Llama 3).
 * **pg (node-postgres):** Cliente para conectar con la base de datos.
 * **CORS:** Gestión de permisos de acceso entre dominios.
 * **Dotenv:** Manejo de variables de entorno seguras.
@@ -77,6 +79,8 @@ DATABASE_URL=postgres://usuario:password@host.render.com/nombre_db
 
 # (Opcional) Tu API Key de Steam para mejorar la estabilidad
 STEAM_API_KEY=api_key_de_steam_aqui
+# API Key de Groq para el Chatbot (Consíguela gratis en console.groq.com)
+GROQ_API_KEY=gsk_tu_clave_groq_aqui
 ```
 ### Como iniciar el proyecto:
 Paso 1: Encender el Backend (Servidor)
